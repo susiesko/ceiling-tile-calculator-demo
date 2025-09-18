@@ -3,7 +3,6 @@ import { useAppState } from './hooks/useAppState';
 import { ShapeConfig } from './components/shapes/ShapeConfig';
 import { CanvasRenderer } from './components/canvas/CanvasRenderer';
 import { TileControls } from './components/TileControls';
-import { CutoutControls } from './components/CutoutControls';
 import { CalculationResults } from './components/CalculationResults';
 import { validateShape } from './utils/validation';
 
@@ -14,9 +13,6 @@ function App() {
     updateShape,
     updateTileConfig,
     updateGridConfig,
-    addCutout,
-    updateCutout,
-    removeCutout,
     updatePricePerTile,
     resetState
   } = useAppState();
@@ -91,16 +87,6 @@ function App() {
               />
             </div>
 
-            {/* Cutout Controls */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <CutoutControls
-                cutouts={state.cutouts}
-                units={state.units}
-                onAddCutout={addCutout}
-                onUpdateCutout={updateCutout}
-                onRemoveCutout={removeCutout}
-              />
-            </div>
 
             {/* Results */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -121,7 +107,6 @@ function App() {
               </h3>
               <CanvasRenderer
                 shape={state.shape}
-                cutouts={state.cutouts}
                 tileConfig={state.tileConfig}
                 gridConfig={state.gridConfig}
                 units={state.units}

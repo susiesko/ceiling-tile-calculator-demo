@@ -1,12 +1,11 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Point, Shape, TileConfig, GridConfig, Cutout, Units } from '../../types';
+import { Point, Shape, TileConfig, GridConfig, Units } from '../../types';
 import { convertShapeToPolygon } from '../../utils/geometry';
 import { formatFeetInches } from '../../utils/units';
 import { WallEditor } from './WallEditor';
 
 interface CanvasRendererProps {
   shape: Shape;
-  cutouts: Cutout[];
   tileConfig: TileConfig;
   gridConfig: GridConfig;
   units: Units;
@@ -28,7 +27,6 @@ interface WallLabel {
 
 export function CanvasRenderer({
   shape,
-  cutouts,
   tileConfig,
   gridConfig,
   units,
@@ -116,11 +114,9 @@ export function CanvasRenderer({
       drawWallLabels(ctx, labels);
     }
 
-    // Draw cutouts
-    drawCutouts(ctx);
 
     ctx.restore();
-  }, [shape, cutouts, tileConfig, zoom, pan, calculateWallLabels]);
+  }, [shape, tileConfig, zoom, pan, calculateWallLabels]);
 
   const drawGrid = (ctx: CanvasRenderingContext2D) => {
     ctx.strokeStyle = '#f3f4f6';
@@ -234,33 +230,6 @@ export function CanvasRenderer({
     });
   };
 
-  const drawCutouts = (ctx: CanvasRenderingContext2D) => {
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
-    ctx.strokeStyle = '#ef4444';
-    ctx.lineWidth = 2;
-
-    for (const cutout of cutouts) {
-      const topLeft = worldToScreen(cutout.position);
-      const bottomRight = worldToScreen({
-        x: cutout.position.x + cutout.dimensions.width,
-        y: cutout.position.y + cutout.dimensions.height
-      });
-
-      const width = bottomRight.x - topLeft.x;
-      const height = bottomRight.y - topLeft.y;
-
-      if (cutout.type === 'rectangle') {
-        ctx.fillRect(topLeft.x, topLeft.y, width, height);
-        ctx.strokeRect(topLeft.x, topLeft.y, width, height);
-      } else {
-        const radius = (cutout.cornerRadius || 0) * PIXELS_PER_FOOT * zoom;
-        ctx.beginPath();
-        ctx.roundRect(topLeft.x, topLeft.y, width, height, radius);
-        ctx.fill();
-        ctx.stroke();
-      }
-    }
-  };
 
   const getRoomBounds = (vertices: Point[]) => {
     let minX = vertices[0].x, maxX = vertices[0].x;

@@ -112,29 +112,6 @@ describe('calculateTiles', () => {
   })
 
 
-  describe('Cutout calculations', () => {
-    it('should account for rectangular cutouts', () => {
-      const roomVertices = [
-        { x: 0, y: 0 },
-        { x: 10, y: 0 },
-        { x: 10, y: 8 },
-        { x: 0, y: 8 }
-      ]
-
-      const cutouts = [{
-        id: '1',
-        type: 'rectangle' as const,
-        position: { x: 2, y: 2 },
-        dimensions: { width: 4, height: 4 }  // Larger cutout to definitely exclude tiles
-      }]
-
-      const result = calculateTiles(roomVertices, cutouts, defaultTileConfig, defaultGridConfig)
-      const resultNoCutout = calculateTiles(roomVertices, [], defaultTileConfig, defaultGridConfig)
-
-      // With cutout, effective area should be less
-      expect(result.totalTiles).toBeLessThan(resultNoCutout.totalTiles)
-    })
-  })
 
   describe('Edge cases', () => {
     it('should handle very small rooms', () => {

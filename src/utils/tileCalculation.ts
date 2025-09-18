@@ -1,4 +1,4 @@
-import { Point, TileConfig, GridConfig, CalculationResult, Cutout, Dimensions } from '../types';
+import { Point, TileConfig, GridConfig, CalculationResult, Dimensions } from '../types';
 import { calculatePolygonArea, isPointInPolygon } from './geometry';
 
 export interface TileCell {
@@ -12,7 +12,7 @@ export interface TileCell {
 
 export function calculateTiles(
   roomVertices: Point[],
-  cutouts: Cutout[],
+  cutouts: never[],
   tileConfig: TileConfig,
   gridConfig: GridConfig
 ): CalculationResult {
@@ -21,7 +21,7 @@ export function calculateTiles(
   const tileArea = tileSize.width * tileSize.height;
 
   const tiles = generateTileGrid(roomVertices, tileSize, gridConfig);
-  const validTiles = filterTilesByCoverage(tiles, roomVertices, cutouts, tileConfig);
+  const validTiles = filterTilesByCoverage(tiles, roomVertices, tileConfig);
 
   const fullTiles = validTiles.filter(tile => tile.isFull).length;
   const partialTiles = validTiles.filter(tile => !tile.isFull).length;
@@ -92,14 +92,13 @@ function generateTileGrid(
 function filterTilesByCoverage(
   tiles: TileCell[],
   roomVertices: Point[],
-  cutouts: Cutout[],
   tileConfig: TileConfig
 ): TileCell[] {
   const validTiles: TileCell[] = [];
   const minCoverage = 0.1; // Minimum coverage to include a tile
 
   for (const tile of tiles) {
-    const coverage = calculateTileCoverage(tile, roomVertices, cutouts, tileConfig);
+    const coverage = calculateTileCoverage(tile, roomVertices, tileConfig);
 
     if (coverage >= minCoverage) {
       tile.coverage = coverage;
@@ -114,7 +113,6 @@ function filterTilesByCoverage(
 function calculateTileCoverage(
   tile: TileCell,
   roomVertices: Point[],
-  cutouts: Cutout[],
   tileConfig: TileConfig
 ): number {
   const sampleSize = 10; // Grid resolution for sampling
@@ -131,7 +129,7 @@ function calculateTileCoverage(
         y: tile.y + (j + 0.5) * stepY
       };
 
-      if (isPointInRoom(samplePoint, roomVertices, cutouts, tileConfig)) {
+      if (isPointInRoom(samplePoint, roomVertices, tileConfig)) {
         coveredSamples++;
       }
     }
@@ -140,60 +138,17 @@ function calculateTileCoverage(
   return coveredSamples / totalSamples;
 }
 
-function isPointInRoom(point: Point, roomVertices: Point[], cutouts: Cutout[], tileConfig: TileConfig): boolean {
+function isPointInRoom(point: Point, roomVertices: Point[], tileConfig: TileConfig): boolean {
   // Check if point is inside the room
   if (!isPointInPolygon(point, roomVertices)) {
     return false;
   }
 
-  // Check if point is in any cutout
-  for (const cutout of cutouts) {
-    if (isPointInCutout(point, cutout)) {
-      return false;
-    }
-  }
 
 
   return true;
 }
 
-function isPointInCutout(point: Point, cutout: Cutout): boolean {
-  const left = cutout.position.x;
-  const right = cutout.position.x + cutout.dimensions.width;
-  const top = cutout.position.y;
-  const bottom = cutout.position.y + cutout.dimensions.height;
-
-  if (cutout.type === 'rectangle') {
-    return point.x >= left && point.x <= right && point.y >= top && point.y <= bottom;
-  }
-
-  // For rounded cutouts, check if point is within rounded rectangle
-  const radius = cutout.cornerRadius || 0;
-
-  // Check if point is in the main rectangle (excluding corners)
-  if ((point.x >= left + radius && point.x <= right - radius) ||
-      (point.y >= top + radius && point.y <= bottom - radius)) {
-    return point.x >= left && point.x <= right && point.y >= top && point.y <= bottom;
-  }
-
-  // Check rounded corners
-  const corners = [
-    { cx: left + radius, cy: top + radius },
-    { cx: right - radius, cy: top + radius },
-    { cx: right - radius, cy: bottom - radius },
-    { cx: left + radius, cy: bottom - radius }
-  ];
-
-  for (const corner of corners) {
-    const dx = point.x - corner.cx;
-    const dy = point.y - corner.cy;
-    if (dx * dx + dy * dy <= radius * radius) {
-      return true;
-    }
-  }
-
-  return false;
-}
 
 function getBounds(vertices: Point[]): { minX: number; maxX: number; minY: number; maxY: number } {
   if (vertices.length === 0) {

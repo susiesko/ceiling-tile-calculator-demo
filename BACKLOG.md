@@ -2,7 +2,7 @@
 * [x] Add a favicon
 * [x] We only need feet/inches as a unit of measurement; get rid of meters 
 * [x] Remove the concept of a border.
-* [ ] Remove the concept of cutouts.
+* [x] Remove the concept of cutouts.
 * [ ] Remove the exporting of files.
 * [ ] The tile size buttons (2 x 2 and 2 x 4) should be represented with images.
 * [ ] The tile orientation for 2 x 4 tiles should also be represented with images.

@@ -32,13 +32,6 @@ export interface LShape {
 
 export type Shape = RectangleShape | LShape;
 
-export interface Cutout {
-  id: string;
-  type: 'rectangle' | 'rounded';
-  position: Point;
-  dimensions: Dimensions;
-  cornerRadius?: number;
-}
 
 export interface TileConfig {
   size: TileSize;
@@ -66,7 +59,6 @@ export interface CalculationResult {
 export interface AppState {
   units: Units;
   shape: Shape;
-  cutouts: Cutout[];
   tileConfig: TileConfig;
   gridConfig: GridConfig;
   calculation: CalculationResult;

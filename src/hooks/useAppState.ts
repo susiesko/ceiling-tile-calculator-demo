@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AppState, Shape, TileConfig, GridConfig, CalculationResult, Units, Cutout } from '../types';
+import { AppState, Shape, TileConfig, GridConfig, CalculationResult, Units } from '../types';
 import { convertShapeToPolygon } from '../utils/geometry';
 import { calculateTiles } from '../utils/tileCalculation';
 
@@ -10,7 +10,6 @@ const defaultAppState: AppState = {
     width: 12,
     height: 10
   },
-  cutouts: [],
   tileConfig: {
     size: '2x2',
     orientation: 0
@@ -54,7 +53,7 @@ export function useAppState() {
     if (roomVertices.length > 0) {
       const calculation = calculateTiles(
         roomVertices,
-        state.cutouts,
+        [],
         state.tileConfig,
         state.gridConfig
       );
@@ -65,7 +64,7 @@ export function useAppState() {
 
       setState(prev => ({ ...prev, calculation }));
     }
-  }, [state.shape, state.cutouts, state.tileConfig, state.gridConfig, state.pricePerTile]);
+  }, [state.shape, state.tileConfig, state.gridConfig, state.pricePerTile]);
 
   // Save to localStorage
   useEffect(() => {
@@ -95,26 +94,6 @@ export function useAppState() {
     }));
   };
 
-  const addCutout = (cutout: Cutout) => {
-    setState(prev => ({
-      ...prev,
-      cutouts: [...prev.cutouts, cutout]
-    }));
-  };
-
-  const updateCutout = (id: string, cutout: Partial<Cutout>) => {
-    setState(prev => ({
-      ...prev,
-      cutouts: prev.cutouts.map(c => c.id === id ? { ...c, ...cutout } : c)
-    }));
-  };
-
-  const removeCutout = (id: string) => {
-    setState(prev => ({
-      ...prev,
-      cutouts: prev.cutouts.filter(c => c.id !== id)
-    }));
-  };
 
   const updatePricePerTile = (price?: number) => {
     setState(prev => ({ ...prev, pricePerTile: price }));
@@ -129,9 +108,6 @@ export function useAppState() {
     updateShape,
     updateTileConfig,
     updateGridConfig,
-    addCutout,
-    updateCutout,
-    removeCutout,
     updatePricePerTile,
     resetState
   };
