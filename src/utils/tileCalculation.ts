@@ -153,20 +153,6 @@ function isPointInRoom(point: Point, roomVertices: Point[], cutouts: Cutout[], t
     }
   }
 
-  // Check border constraints if border is enabled
-  if (tileConfig.enableBorder && tileConfig.borderWidth > 0) {
-    // This is a simplified border check - in a real implementation,
-    // you'd calculate the actual distance to polygon edges
-    const bounds = getBounds(roomVertices);
-    const inBorder = point.x < bounds.minX + tileConfig.borderWidth ||
-        point.x > bounds.maxX - tileConfig.borderWidth ||
-        point.y < bounds.minY + tileConfig.borderWidth ||
-        point.y > bounds.maxY - tileConfig.borderWidth;
-
-    if (inBorder) {
-      return false;
-    }
-  }
 
   return true;
 }

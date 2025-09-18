@@ -43,8 +43,6 @@ export interface Cutout {
 export interface TileConfig {
   size: TileSize;
   orientation: TileOrientation;
-  borderWidth: number;
-  enableBorder: boolean;
 }
 
 export interface GridConfig {

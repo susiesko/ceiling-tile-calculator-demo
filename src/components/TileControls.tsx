@@ -72,38 +72,6 @@ export function TileControls({
         </div>
       </div>
 
-      {/* Border */}
-      <div>
-        <div className="flex items-center space-x-3 mb-3">
-          <input
-            type="checkbox"
-            id="enableBorder"
-            checked={tileConfig.enableBorder}
-            onChange={(e) => onTileConfigChange({ enableBorder: e.target.checked })}
-            className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500"
-          />
-          <label htmlFor="enableBorder" className="text-sm font-medium text-gray-700">
-            Enable Border
-          </label>
-        </div>
-
-        {tileConfig.enableBorder && (
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Border Width ({unitLabel})
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="0.25"
-              value={tileConfig.borderWidth || ''}
-              onChange={(e) => onTileConfigChange({ borderWidth: parseFloat(e.target.value) || 0 })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Enter border width"
-            />
-          </div>
-        )}
-      </div>
 
       {/* Price per Tile */}
       <div>

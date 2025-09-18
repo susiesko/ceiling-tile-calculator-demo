@@ -83,9 +83,6 @@ export function generateShoppingList(state: AppState): string {
   list += `• Total recommended: ${calculation.estimatedTotal.toLocaleString()}\n`;
   list += `• Waste factor: ${calculation.wasteFactor.toFixed(1)}%\n\n`;
 
-  if (tileConfig.enableBorder && tileConfig.borderWidth > 0) {
-    list += `Border width: ${tileConfig.borderWidth} feet\n\n`;
-  }
 
   if (calculation.costEstimate) {
     list += `Estimated cost: $${calculation.costEstimate.toFixed(2)}\n\n`;

@@ -5,9 +5,7 @@ import { TileConfig, GridConfig } from '../../types'
 describe('calculateTiles', () => {
   const defaultTileConfig: TileConfig = {
     size: '2x2',
-    orientation: 0,
-    borderWidth: 0,
-    enableBorder: false
+    orientation: 0
   }
 
   const defaultGridConfig: GridConfig = {
@@ -113,28 +111,6 @@ describe('calculateTiles', () => {
     })
   })
 
-  describe('Border calculations', () => {
-    it('should account for border width', () => {
-      const roomVertices = [
-        { x: 0, y: 0 },
-        { x: 10, y: 0 },
-        { x: 10, y: 8 },
-        { x: 0, y: 8 }
-      ]
-
-      const tileConfigWithBorder: TileConfig = {
-        ...defaultTileConfig,
-        enableBorder: true,
-        borderWidth: 1.5  // Larger border that will definitely exclude edge tiles
-      }
-
-      const result = calculateTiles(roomVertices, [], tileConfigWithBorder, defaultGridConfig)
-      const resultNoBorder = calculateTiles(roomVertices, [], defaultTileConfig, defaultGridConfig)
-
-      // With border, we should need fewer tiles (less usable area)
-      expect(result.totalTiles).toBeLessThan(resultNoBorder.totalTiles)
-    })
-  })
 
   describe('Cutout calculations', () => {
     it('should account for rectangular cutouts', () => {

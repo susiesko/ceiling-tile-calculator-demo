@@ -13,9 +13,7 @@ const defaultAppState: AppState = {
   cutouts: [],
   tileConfig: {
     size: '2x2',
-    orientation: 0,
-    borderWidth: 0,
-    enableBorder: false
+    orientation: 0
   },
   gridConfig: {
     origin: 'top-left',
