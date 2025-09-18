@@ -36,7 +36,6 @@ export function CanvasRenderer({
 }: CanvasRendererProps) {
   const internalCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = externalCanvasRef || internalCanvasRef;
-  const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [lastPan, setLastPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -45,17 +44,17 @@ export function CanvasRenderer({
 
   const worldToScreen = useCallback((point: Point): Point => {
     return {
-      x: (point.x * PIXELS_PER_FOOT * zoom + pan.x) + CANVAS_WIDTH / 2,
-      y: (point.y * PIXELS_PER_FOOT * zoom + pan.y) + CANVAS_HEIGHT / 2
+      x: (point.x * PIXELS_PER_FOOT + pan.x) + CANVAS_WIDTH / 2,
+      y: (point.y * PIXELS_PER_FOOT + pan.y) + CANVAS_HEIGHT / 2
     };
-  }, [zoom, pan]);
+  }, [pan]);
 
   const screenToWorld = useCallback((point: Point): Point => {
     return {
-      x: (point.x - CANVAS_WIDTH / 2 - pan.x) / (PIXELS_PER_FOOT * zoom),
-      y: (point.y - CANVAS_HEIGHT / 2 - pan.y) / (PIXELS_PER_FOOT * zoom)
+      x: (point.x - CANVAS_WIDTH / 2 - pan.x) / PIXELS_PER_FOOT,
+      y: (point.y - CANVAS_HEIGHT / 2 - pan.y) / PIXELS_PER_FOOT
     };
-  }, [zoom, pan]);
+  }, [pan]);
 
   const calculateWallLabels = useCallback((vertices: Point[]): WallLabel[] => {
     const labels: WallLabel[] = [];
@@ -116,13 +115,13 @@ export function CanvasRenderer({
 
 
     ctx.restore();
-  }, [shape, tileConfig, zoom, pan, calculateWallLabels]);
+  }, [shape, tileConfig, pan, calculateWallLabels]);
 
   const drawGrid = (ctx: CanvasRenderingContext2D) => {
     ctx.strokeStyle = '#f3f4f6';
     ctx.lineWidth = 1;
 
-    const gridSize = PIXELS_PER_FOOT * zoom; // 1 foot grid
+    const gridSize = PIXELS_PER_FOOT; // 1 foot grid
     const startX = (-pan.x % gridSize + CANVAS_WIDTH / 2) % gridSize;
     const startY = (-pan.y % gridSize + CANVAS_HEIGHT / 2) % gridSize;
 
@@ -152,8 +151,8 @@ export function CanvasRenderer({
 
     const tileSize = tileConfig.size === '2x2' ? 2 : (tileConfig.orientation === 0 ? { w: 2, h: 4 } : { w: 4, h: 2 });
     const tileSizePixels = {
-      width: (typeof tileSize === 'number' ? tileSize : tileSize.w) * PIXELS_PER_FOOT * zoom,
-      height: (typeof tileSize === 'number' ? tileSize : tileSize.h) * PIXELS_PER_FOOT * zoom
+      width: (typeof tileSize === 'number' ? tileSize : tileSize.w) * PIXELS_PER_FOOT,
+      height: (typeof tileSize === 'number' ? tileSize : tileSize.h) * PIXELS_PER_FOOT
     };
 
     // Get room bounds
@@ -288,11 +287,6 @@ export function CanvasRenderer({
     setIsPanning(false);
   };
 
-  const handleWheel = (event: React.WheelEvent) => {
-    event.preventDefault();
-    const delta = event.deltaY > 0 ? 0.9 : 1.1;
-    setZoom(prev => Math.max(0.2, Math.min(5, prev * delta)));
-  };
 
   const findWallLabelAt = (screenPos: Point): number => {
     for (let i = 0; i < wallLabels.length; i++) {
@@ -318,29 +312,19 @@ export function CanvasRenderer({
     return -1;
   };
 
-  // Auto-fit room to canvas on shape change
+  // Auto-center room to canvas on shape change
   useEffect(() => {
     const vertices = convertShapeToPolygon(shape);
     if (vertices.length === 0) return;
 
     const bounds = getRoomBounds(vertices);
-    const roomWidth = bounds.maxX - bounds.minX;
-    const roomHeight = bounds.maxY - bounds.minY;
-
-    // Calculate zoom to fit room with some padding
-    const padding = 50; // pixels
-    const zoomX = (CANVAS_WIDTH - padding * 2) / (roomWidth * PIXELS_PER_FOOT);
-    const zoomY = (CANVAS_HEIGHT - padding * 2) / (roomHeight * PIXELS_PER_FOOT);
-    const newZoom = Math.min(zoomX, zoomY, 2); // Cap at 2x zoom
-
-    setZoom(newZoom);
 
     // Center the room
     const roomCenterX = (bounds.minX + bounds.maxX) / 2;
     const roomCenterY = (bounds.minY + bounds.maxY) / 2;
     setPan({
-      x: -roomCenterX * PIXELS_PER_FOOT * newZoom,
-      y: -roomCenterY * PIXELS_PER_FOOT * newZoom
+      x: -roomCenterX * PIXELS_PER_FOOT,
+      y: -roomCenterY * PIXELS_PER_FOOT
     });
   }, [shape]);
 
@@ -352,9 +336,6 @@ export function CanvasRenderer({
     <div className={`space-y-4 ${className}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <span className="text-sm font-medium text-gray-700">
-            Zoom: {(zoom * 100).toFixed(0)}%
-          </span>
           <span className="text-sm text-gray-600">
             Scale: 1 ft = {PIXELS_PER_FOOT} pixels
           </span>
@@ -377,7 +358,6 @@ export function CanvasRenderer({
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          onWheel={handleWheel}
           className="cursor-pointer"
         />
       </div>
@@ -385,7 +365,6 @@ export function CanvasRenderer({
       <div className="text-sm text-gray-600 space-y-1">
         <p>• Click on wall length labels to edit dimensions</p>
         <p>• Shift+click and drag to pan the view</p>
-        <p>• Scroll to zoom in/out</p>
       </div>
 
       {/* Wall Editor Modal */}
