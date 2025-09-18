@@ -65,8 +65,3 @@ export interface AppState {
   pricePerTile?: number;
 }
 
-export interface ExportData {
-  configuration: Omit<AppState, 'calculation'>;
-  timestamp: string;
-  version: string;
-}

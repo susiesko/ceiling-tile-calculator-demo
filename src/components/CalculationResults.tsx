@@ -1,5 +1,4 @@
 import { CalculationResult, Units, AppState } from '../types';
-import { exportConfiguration, generateShoppingList, downloadTextFile } from '../utils/export';
 
 interface CalculationResultsProps {
   calculation: CalculationResult;
@@ -11,27 +10,6 @@ interface CalculationResultsProps {
 
 export function CalculationResults({ calculation, units, appState, canvasRef, className = '' }: CalculationResultsProps) {
   const unitLabel = 'sq ft';
-
-  const handleExportPNG = () => {
-    if (canvasRef?.current) {
-      const canvas = canvasRef.current;
-      const link = document.createElement('a');
-      link.download = `ceiling-tile-layout-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = canvas.toDataURL('image/png');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
-  const handleExportConfig = () => {
-    exportConfiguration(appState);
-  };
-
-  const handleExportShoppingList = () => {
-    const shoppingList = generateShoppingList(appState);
-    downloadTextFile(shoppingList, `ceiling-tile-shopping-list-${new Date().toISOString().split('T')[0]}.txt`);
-  };
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -96,30 +74,6 @@ export function CalculationResults({ calculation, units, appState, canvasRef, cl
         )}
       </div>
 
-      {/* Export Actions */}
-      <div className="space-y-3">
-        <h4 className="font-medium text-gray-800">Export</h4>
-        <div className="grid grid-cols-1 gap-2">
-          <button
-            onClick={handleExportPNG}
-            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm"
-          >
-            Export PNG Image
-          </button>
-          <button
-            onClick={handleExportConfig}
-            className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
-          >
-            Export Configuration
-          </button>
-          <button
-            onClick={handleExportShoppingList}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
-          >
-            Export Shopping List
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
