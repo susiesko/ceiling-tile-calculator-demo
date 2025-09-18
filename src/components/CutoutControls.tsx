@@ -27,7 +27,7 @@ export function CutoutControls({
     cornerRadius: 0
   });
 
-  const unitLabel = units === 'feet' ? 'ft' : 'm';
+  const unitLabel = 'ft';
 
   const handleAddCutout = () => {
     const cutout: Cutout = {

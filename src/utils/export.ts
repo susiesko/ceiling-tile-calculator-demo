@@ -67,14 +67,14 @@ export function importConfiguration(file: File): Promise<ExportData> {
 
 export function generateShoppingList(state: AppState): string {
   const { calculation, tileConfig, units } = state;
-  const unitLabel = units === 'feet' ? 'sq ft' : 'sq m';
+  const unitLabel = 'sq ft';
   const tileLabel = tileConfig.size === '2x2' ? '2×2' : '2×4';
 
   let list = 'Ceiling Tile Shopping List\n';
   list += '=========================\n\n';
 
   list += `Room Area: ${calculation.area.toFixed(1)} ${unitLabel}\n`;
-  list += `Tile Size: ${tileLabel} ${units === 'feet' ? 'feet' : 'meters'}\n`;
+  list += `Tile Size: ${tileLabel} feet\n`;
   list += `Tile Orientation: ${tileConfig.orientation}°\n\n`;
 
   list += 'Tiles Needed:\n';
@@ -84,7 +84,7 @@ export function generateShoppingList(state: AppState): string {
   list += `• Waste factor: ${calculation.wasteFactor.toFixed(1)}%\n\n`;
 
   if (tileConfig.enableBorder && tileConfig.borderWidth > 0) {
-    list += `Border width: ${tileConfig.borderWidth} ${units === 'feet' ? 'feet' : 'meters'}\n\n`;
+    list += `Border width: ${tileConfig.borderWidth} feet\n\n`;
   }
 
   if (calculation.costEstimate) {

@@ -43,18 +43,6 @@ describe('validateShape', () => {
       expect(result.warnings).toContain('Width is very small (minimum recommended: 0.5 feet)')
     })
 
-    it('should warn about very small dimensions in meters', () => {
-      const smallRectangle: RectangleShape = {
-        type: 'rectangle',
-        width: 0.1, // Less than 0.15 m
-        height: 2
-      }
-
-      const result = validateShape(smallRectangle, 'meters')
-
-      expect(result.isValid).toBe(true)
-      expect(result.warnings).toContain('Width is very small (minimum recommended: 0.15 meters)')
-    })
   })
 
   describe('L-shape validation', () => {
@@ -119,18 +107,6 @@ describe('validateShape', () => {
       expect(result.warnings.some(w => w.includes('Performance may be affected'))).toBe(true)
     })
 
-    it('should warn about very large rooms in meters', () => {
-      const largeRectangle: RectangleShape = {
-        type: 'rectangle',
-        width: 15, // 15x15 = 225 sq m (over 186 limit)
-        height: 15
-      }
-
-      const result = validateShape(largeRectangle, 'meters')
-
-      expect(result.isValid).toBe(true)
-      expect(result.warnings.some(w => w.includes('Room area is very large'))).toBe(true)
-    })
 
     it('should not warn about normal-sized rooms', () => {
       const normalRectangle: RectangleShape = {
@@ -146,22 +122,6 @@ describe('validateShape', () => {
     })
   })
 
-  describe('Units handling', () => {
-    it('should apply different thresholds for different units', () => {
-      // Same numeric value, different units
-      const shape: RectangleShape = {
-        type: 'rectangle',
-        width: 0.3,
-        height: 2
-      }
-
-      const feetResult = validateShape(shape, 'feet')
-      const meterResult = validateShape(shape, 'meters')
-
-      // 0.3 feet is small, 0.3 meters is okay
-      expect(feetResult.warnings.length).toBeGreaterThan(meterResult.warnings.length)
-    })
-  })
 
   describe('Multiple validation issues', () => {
     it('should report multiple errors and warnings', () => {

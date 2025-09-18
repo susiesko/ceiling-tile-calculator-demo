@@ -8,7 +8,7 @@ export interface Dimensions {
   height: number;
 }
 
-export type Units = 'feet' | 'meters';
+export type Units = 'feet';
 
 export type TileSize = '2x2' | '2x4';
 

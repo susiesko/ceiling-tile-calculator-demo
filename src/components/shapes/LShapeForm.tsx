@@ -9,7 +9,7 @@ interface LShapeFormProps {
 }
 
 export function LShapeForm({ shape, units, onChange, className = '' }: LShapeFormProps) {
-  const unitLabel = units === 'feet' ? 'ft' : 'm';
+  const unitLabel = 'ft';
 
   const handleChange = (field: keyof Omit<LShape, 'type'>) => (
     event: React.ChangeEvent<HTMLInputElement>

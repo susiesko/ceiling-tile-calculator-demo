@@ -78,9 +78,6 @@ export function useAppState() {
     }
   }, [state]);
 
-  const updateUnits = (units: Units) => {
-    setState(prev => ({ ...prev, units }));
-  };
 
   const updateShape = (shape: Shape) => {
     setState(prev => ({ ...prev, shape }));
@@ -131,7 +128,6 @@ export function useAppState() {
 
   return {
     state,
-    updateUnits,
     updateShape,
     updateTileConfig,
     updateGridConfig,

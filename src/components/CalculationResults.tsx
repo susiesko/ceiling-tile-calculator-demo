@@ -10,7 +10,7 @@ interface CalculationResultsProps {
 }
 
 export function CalculationResults({ calculation, units, appState, canvasRef, className = '' }: CalculationResultsProps) {
-  const unitLabel = units === 'feet' ? 'sq ft' : 'sq m';
+  const unitLabel = 'sq ft';
 
   const handleExportPNG = () => {
     if (canvasRef?.current) {

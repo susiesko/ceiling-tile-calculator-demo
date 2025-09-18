@@ -132,7 +132,7 @@ export function WallEditor({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-2">
-              New Length ({units === 'feet' ? "feet & inches" : "meters"})
+              New Length (feet & inches)
             </label>
             <input
               type="text"

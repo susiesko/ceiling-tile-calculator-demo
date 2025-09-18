@@ -5,14 +5,12 @@ import { CanvasRenderer } from './components/canvas/CanvasRenderer';
 import { TileControls } from './components/TileControls';
 import { CutoutControls } from './components/CutoutControls';
 import { CalculationResults } from './components/CalculationResults';
-import { Units } from './types';
 import { validateShape } from './utils/validation';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const {
     state,
-    updateUnits,
     updateShape,
     updateTileConfig,
     updateGridConfig,
@@ -41,28 +39,6 @@ function App() {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Units Toggle */}
-              <div className="flex items-center space-x-2">
-                <span className="text-sm font-medium text-gray-700">Units:</span>
-                <div className="flex rounded-lg border border-gray-300 overflow-hidden">
-                  {(['feet', 'meters'] as Units[]).map((unit) => (
-                    <button
-                      key={unit}
-                      onClick={() => updateUnits(unit)}
-                      className={`
-                        px-3 py-1 text-sm font-medium transition-colors
-                        ${state.units === unit
-                          ? 'bg-primary-600 text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }
-                      `}
-                    >
-                      {unit}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               <button
                 onClick={resetState}
                 className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"

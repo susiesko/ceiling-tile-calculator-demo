@@ -9,7 +9,7 @@ interface RectangleFormProps {
 }
 
 export function RectangleForm({ shape, units, onChange, className = '' }: RectangleFormProps) {
-  const unitLabel = units === 'feet' ? 'ft' : 'm';
+  const unitLabel = 'ft';
 
   const handleChange = (field: keyof Omit<RectangleShape, 'type'>) => (
     event: React.ChangeEvent<HTMLInputElement>

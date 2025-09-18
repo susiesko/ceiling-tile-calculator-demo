@@ -18,7 +18,7 @@ export function TileControls({
   onPriceChange,
   className = ''
 }: TileControlsProps) {
-  const unitLabel = units === 'feet' ? 'ft' : 'm';
+  const unitLabel = 'ft';
 
   return (
     <div className={`space-y-6 ${className}`}>

@@ -14,8 +14,8 @@ export function validateShape(shape: Shape, units: Units): ValidationResult {
     warnings: []
   };
 
-  const unitLabel = units === 'feet' ? 'feet' : 'meters';
-  const minDimension = units === 'feet' ? 0.5 : 0.15; // 0.5 ft or 15 cm
+  const unitLabel = 'feet';
+  const minDimension = 0.5; // 0.5 ft
 
   switch (shape.type) {
     case 'rectangle':
@@ -53,10 +53,10 @@ export function validateShape(shape: Shape, units: Units): ValidationResult {
   if (vertices.length > 0) {
     const bounds = getBounds(vertices);
     const area = Math.abs(bounds.maxX - bounds.minX) * Math.abs(bounds.maxY - bounds.minY);
-    const maxArea = units === 'feet' ? 2000 : 186; // 2000 sq ft or 186 sq m
+    const maxArea = 2000; // 2000 sq ft
 
     if (area > maxArea) {
-      result.warnings.push(`Room area is very large (${area.toFixed(1)} ${units === 'feet' ? 'sq ft' : 'sq m'}). Performance may be affected.`);
+      result.warnings.push(`Room area is very large (${area.toFixed(1)} sq ft). Performance may be affected.`);
     }
   }
 

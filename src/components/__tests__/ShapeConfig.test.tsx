@@ -118,24 +118,6 @@ describe('ShapeConfig', () => {
       expect(screen.getByText('Height (ft)')).toBeInTheDocument()
     })
 
-    it('should show metric units when appropriate', () => {
-      const shape: RectangleShape = {
-        type: 'rectangle',
-        width: 3,
-        height: 2.5
-      }
-
-      render(
-        <ShapeConfig
-          shape={shape}
-          units="meters"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
-
-      expect(screen.getByText('Width (m)')).toBeInTheDocument()
-      expect(screen.getByText('Height (m)')).toBeInTheDocument()
-    })
 
     it('should update shape when width input changes', async () => {
       const user = userEvent.setup()

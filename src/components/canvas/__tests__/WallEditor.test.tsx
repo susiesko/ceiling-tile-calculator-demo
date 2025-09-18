@@ -72,20 +72,6 @@ describe('WallEditor', () => {
       expect(screen.getByDisplayValue("10' 6\"")).toBeInTheDocument()
     })
 
-    it('should pre-populate with current length in metric format', () => {
-      render(
-        <WallEditor
-          wallIndex={0}
-          currentLength={3.2}
-          shape={rectangleShape}
-          units="meters"
-          onShapeChange={mockOnShapeChange}
-          onClose={mockOnClose}
-        />
-      )
-
-      expect(screen.getByDisplayValue("3.2")).toBeInTheDocument()
-    })
 
     it('should update rectangle width for top/bottom walls', async () => {
       const user = userEvent.setup()
@@ -353,20 +339,6 @@ describe('WallEditor', () => {
       expect(screen.getByPlaceholderText("e.g., 10' 6\"")).toBeInTheDocument()
     })
 
-    it('should show metric placeholder for meters', () => {
-      render(
-        <WallEditor
-          wallIndex={0}
-          currentLength={3}
-          shape={rectangleShape}
-          units="meters"
-          onShapeChange={mockOnShapeChange}
-          onClose={mockOnClose}
-        />
-      )
-
-      expect(screen.getByPlaceholderText("e.g., 3.2")).toBeInTheDocument()
-    })
 
     it('should show format examples for feet', () => {
       render(
