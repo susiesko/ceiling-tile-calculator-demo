@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ceiling Tile Calculator Demo</title>
+    <script>
+      // GitHub Pages SPA redirect
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <script>
+      // GitHub Pages SPA redirect
+      (function() {
+        var path = location.pathname.slice(1);
+        if (path) {
+          sessionStorage.redirect = location.href;
+          location.replace(location.origin + location.pathname.split('/')[0] + '/');
+        }
+      })();
+    </script>
+  </body>
+</html>
