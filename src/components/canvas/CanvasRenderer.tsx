@@ -1,8 +1,8 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Point, Shape, TileConfig, GridConfig, Units } from '../../types';
-import { convertShapeToPolygon } from '../../utils/geometry';
-import { formatFeetInches } from '../../utils/units';
-import { WallEditor } from './WallEditor';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {GridConfig, Point, Shape, TileConfig, TileOrientation, Units} from '../../types';
+import {convertShapeToPolygon} from '../../utils/geometry';
+import {formatFeetInches} from '../../utils/units';
+import {WallEditor} from './WallEditor';
 
 interface CanvasRendererProps {
   shape: Shape;
@@ -124,21 +124,48 @@ export function CanvasRenderer({
     ctx.strokeStyle = '#f3f4f6';
     ctx.lineWidth = 1;
 
-    const gridSize = PIXELS_PER_FOOT; // 1 foot grid
+    console.log('drawing grid')
+    const baseTileSize = PIXELS_PER_FOOT; // 1 foot base
 
-    // Draw vertical lines - completely fixed grid
-    for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
+    // For 2x4 tiles, adjust grid spacing based on orientation
+    let xSpacing = baseTileSize;
+    let ySpacing = baseTileSize;
+
+    if (tileConfig.size === '2x4') {
+      if (tileConfig.orientation === TileOrientation.Horizontal) {
+        // Horizontal 2x4: 4ft wide x 2ft tall
+        xSpacing = baseTileSize * 4; // 4 feet wide
+        ySpacing = baseTileSize * 2; // 2 feet tall
+      } else {
+        // Vertical 2x4: 2ft wide x 4ft tall (rotated 90°)
+        xSpacing = baseTileSize * 2; // 2 feet wide
+        ySpacing = baseTileSize * 4; // 4 feet tall
+      }
+    } else {
+      // 2x2 tiles: 2ft x 2ft
+      xSpacing = baseTileSize * 2;
+      ySpacing = baseTileSize * 2;
+    }
+
+    console.log('xSpacing', xSpacing);
+    console.log('ySpacing', ySpacing);
+    console.log('tileConfig.orientation', tileConfig.orientation);
+
+    // Draw vertical lines
+    for (let x = 0; x <= CANVAS_WIDTH; x += xSpacing) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, CANVAS_HEIGHT);
+      console.log(`drawing vertical line from [${x}, 0] to [${x}, ${CANVAS_HEIGHT}]`)
       ctx.stroke();
     }
 
-    // Draw horizontal lines - completely fixed grid
-    for (let y = 0; y <= CANVAS_HEIGHT; y += gridSize) {
+    // Draw horizontal lines
+    for (let y = 0; y <= CANVAS_HEIGHT; y += ySpacing) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(CANVAS_WIDTH, y);
+      console.log(`drawing horizontal line from [0, ${y}] to [${CANVAS_WIDTH}, ${y}]`)
       ctx.stroke();
     }
   };
@@ -150,7 +177,7 @@ export function CanvasRenderer({
     ctx.strokeStyle = '#e5e7eb';
     ctx.lineWidth = 1;
 
-    const tileSize = tileConfig.size === '2x2' ? 2 : (tileConfig.orientation === 0 ? { w: 2, h: 4 } : { w: 4, h: 2 });
+    const tileSize = tileConfig.size === '2x2' ? 2 : (tileConfig.orientation === TileOrientation.Horizontal ? { w: 4, h: 2 } : { w: 2, h: 4 });
     const tileSizePixels = {
       width: (typeof tileSize === 'number' ? tileSize : tileSize.w) * PIXELS_PER_FOOT,
       height: (typeof tileSize === 'number' ? tileSize : tileSize.h) * PIXELS_PER_FOOT

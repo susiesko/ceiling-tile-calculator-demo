@@ -1,8 +1,4 @@
 # BACKLOG
-* [ ] Update the tile orientation section.
-  * [ ] The tile orientation config section should only display if 2 x 4 is selected.
-  * [ ] The tile orientation (vertical or horizontal) for 2 x 4 tiles should also be represented with images.
-  * [ ] The grid should rotate with the selected tile orientation.
 * [ ] Update the wall length inputs.  
   * [ ] For each wall, there should be a feet input and an inches input.  
 * [ ] Wall labels should be shown in a measurement of feet and inches.  So 5.5 feet should display as 5'6"
@@ -26,3 +22,7 @@
   * [x] If the wall is vertical, it should only move horizontally (left to right).
   * [x] If the wall is horizontal, it should only move vertically (up and down).
 * [x] The tile size buttons (2 x 2 and 2 x 4) should be represented with clickable images or svg squares/rectangles instead of buttons.
+* [x] Update the tile orientation section.
+  * [x] The tile orientation config section should only display if 2 x 4 is selected.
+  * [x] The tile orientation (vertical or horizontal) for 2 x 4 tiles should also be represented with images.
+  * [x] The grid should rotate with the selected tile orientation.

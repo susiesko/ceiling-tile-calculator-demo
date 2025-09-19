@@ -10,6 +10,58 @@ interface TileControlsProps {
   className?: string;
 }
 
+const TileOrientationIcon = ({ orientation, isSelected }: { orientation: TileOrientation; isSelected: boolean }) => {
+  const fillColor = isSelected ? '#3b82f6' : '#e5e7eb';
+
+  if (orientation === 0) {
+    // Horizontal 2x4 tile
+    return (
+      <svg width="100" height="80" viewBox="0 0 100 80" className="mx-auto">
+        <rect
+          x="10"
+          y="20"
+          width="80"
+          height="40"
+          fill={fillColor}
+          rx="6"
+        />
+        <text
+          x="50"
+          y="43"
+          textAnchor="middle"
+          className="text-sm font-bold"
+          fill={isSelected ? '#ffffff' : '#6b7280'}
+        >
+          2×4
+        </text>
+      </svg>
+    );
+  } else {
+    // Vertical 2x4 tile
+    return (
+      <svg width="80" height="100" viewBox="0 0 80 100" className="mx-auto">
+        <rect
+          x="20"
+          y="10"
+          width="40"
+          height="80"
+          fill={fillColor}
+          rx="6"
+        />
+        <text
+          x="40"
+          y="53"
+          textAnchor="middle"
+          className="text-sm font-bold"
+          fill={isSelected ? '#ffffff' : '#6b7280'}
+        >
+          2×4
+        </text>
+      </svg>
+    );
+  }
+};
+
 const TileSizeIcon = ({ size, isSelected }: { size: TileSize; isSelected: boolean }) => {
   const fillColor = isSelected ? '#3b82f6' : '#e5e7eb';
 
@@ -95,29 +147,30 @@ export function TileControls({
         </div>
       </div>
 
-      {/* Tile Orientation */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Tile Orientation
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          {([0, 90] as TileOrientation[]).map((orientation) => (
-            <button
-              key={orientation}
-              onClick={() => onTileConfigChange({ orientation })}
-              className={`
-                p-3 rounded-lg border-2 transition-all text-center
-                ${tileConfig.orientation === orientation
-                  ? 'border-primary-500 bg-primary-50 text-primary-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                }
-              `}
-            >
-              {orientation}°
-            </button>
-          ))}
+      {/* Tile Orientation - Only show for 2x4 tiles */}
+      {tileConfig.size === '2x4' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Tile Orientation
+          </label>
+          <div className="grid grid-cols-2 gap-6">
+            {([0, 90] as TileOrientation[]).map((orientation) => (
+              <div
+                key={orientation}
+                onClick={() => onTileConfigChange({ orientation })}
+                className="cursor-pointer flex flex-col items-center space-y-3 transition-all hover:scale-105"
+              >
+                <TileOrientationIcon orientation={orientation} isSelected={tileConfig.orientation === orientation} />
+                <span className={`text-sm font-medium ${
+                  tileConfig.orientation === orientation ? 'text-primary-700' : 'text-gray-600'
+                }`}>
+                  {orientation === 0 ? 'Horizontal' : 'Vertical'}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
 
       {/* Price per Tile */}

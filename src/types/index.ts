@@ -12,7 +12,10 @@ export type Units = 'feet';
 
 export type TileSize = '2x2' | '2x4';
 
-export type TileOrientation = 0 | 90;
+export enum TileOrientation {
+  Horizontal = 0,
+  Vertical = 90,
+}
 
 export type ShapeType = 'rectangle' | 'l-shape';
 
