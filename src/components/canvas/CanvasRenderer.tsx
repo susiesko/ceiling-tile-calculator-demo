@@ -263,6 +263,9 @@ export function CanvasRenderer({
     const clickedWall = findWallLabelAt(mousePos);
     if (clickedWall !== -1) {
       setEditingWall(clickedWall);
+    } else {
+      // Clicking elsewhere cancels edit mode
+      setEditingWall(null);
     }
   };
 
@@ -340,14 +343,6 @@ export function CanvasRenderer({
             Scale: 1 ft = {PIXELS_PER_FOOT} pixels
           </span>
         </div>
-        {editingWall !== null && (
-          <button
-            onClick={() => setEditingWall(null)}
-            className="px-3 py-1 text-sm bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200"
-          >
-            Cancel Edit
-          </button>
-        )}
       </div>
 
       <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">

@@ -5,7 +5,7 @@
 * [x] Remove the concept of cutouts.
 * [x] Remove the exporting of files.
 * [x] You should not be able to zoom the canvas in and out.  The content of the canvas should be at 100% zoom.
-* [ ] No button should display when the canvas is focused.  You should just be able to click on the labels and edit them.
+* [x] No button should display when the canvas is focused.  You should just be able to click on the labels and edit them.
 * [ ] When you click and drag a wall length label, it should move the wall, resizing the adjacent walls.
     * [ ] The labels should "activate" or change colors when clicked.
     * [ ] If the wall is vertical, it should only move horizontally (left to right).
