@@ -1,8 +1,4 @@
-# BACKLOG 
-* [ ] When you click and drag a wall length label, it should move the wall, resizing the adjacent walls.
-    * [ ] The labels should "activate" or change colors when clicked.
-    * [ ] If the wall is vertical, it should only move horizontally (left to right).
-    * [ ] If the wall is horizontal, it should only move vertically (up and down).
+# BACKLOG
 * [ ] The tile size buttons (2 x 2 and 2 x 4) should be represented with images or svgs.
 * [ ] The tile orientation for 2 x 4 tiles should also be represented with images.
 * [ ] Wall labels should be shown in a measurement of feet and inches.  So 5.5 feet should display as 5'6"
@@ -20,3 +16,7 @@
 * [x] No button should display when the canvas is focused.  You should just be able to click on the labels and edit them.
 * [x] Add deployment configuration for GitHub pages.
   * [x] It should only deploy the main branch and should trigger when the main branch updates.
+* [x] When you click and drag a wall length label, it should move the wall, resizing the adjacent walls.
+  * [x] The labels should "activate" or change colors when clicked.
+  * [x] If the wall is vertical, it should only move horizontally (left to right).
+  * [x] If the wall is horizontal, it should only move vertically (up and down).

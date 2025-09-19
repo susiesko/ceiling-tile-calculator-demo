@@ -41,6 +41,8 @@ export function CanvasRenderer({
   const [isPanning, setIsPanning] = useState(false);
   const [editingWall, setEditingWall] = useState<number | null>(null);
   const [wallLabels, setWallLabels] = useState<WallLabel[]>([]);
+  const [isDraggingWall, setIsDraggingWall] = useState(false);
+  const [dragStart, setDragStart] = useState<Point | null>(null);
 
   const worldToScreen = useCallback((point: Point): Point => {
     return {
@@ -94,10 +96,12 @@ export function CanvasRenderer({
 
     // Clear canvas
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-    ctx.save();
 
-    // Draw grid
+    // Draw grid FIRST, without any transformations
     drawGrid(ctx);
+
+    // Now apply transformations for the room content
+    ctx.save();
 
     // Draw tiles
     drawTiles(ctx);
@@ -113,7 +117,6 @@ export function CanvasRenderer({
       drawWallLabels(ctx, labels);
     }
 
-
     ctx.restore();
   }, [shape, tileConfig, pan, calculateWallLabels]);
 
@@ -122,19 +125,17 @@ export function CanvasRenderer({
     ctx.lineWidth = 1;
 
     const gridSize = PIXELS_PER_FOOT; // 1 foot grid
-    const startX = (-pan.x % gridSize + CANVAS_WIDTH / 2) % gridSize;
-    const startY = (-pan.y % gridSize + CANVAS_HEIGHT / 2) % gridSize;
 
-    // Draw vertical lines
-    for (let x = startX; x < CANVAS_WIDTH; x += gridSize) {
+    // Draw vertical lines - completely fixed grid
+    for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, CANVAS_HEIGHT);
       ctx.stroke();
     }
 
-    // Draw horizontal lines
-    for (let y = startY; y < CANVAS_HEIGHT; y += gridSize) {
+    // Draw horizontal lines - completely fixed grid
+    for (let y = 0; y <= CANVAS_HEIGHT; y += gridSize) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(CANVAS_WIDTH, y);
@@ -216,15 +217,18 @@ export function CanvasRenderer({
       const bgWidth = metrics.width + padding * 2;
       const bgHeight = 24;
 
-      ctx.fillStyle = editingWall === index ? '#fef3c7' : '#ffffff';
-      ctx.strokeStyle = editingWall === index ? '#f59e0b' : '#d1d5db';
-      ctx.lineWidth = 2;
+      const isActive = editingWall === index;
+      const isDragging = isActive && isDraggingWall;
+
+      ctx.fillStyle = isDragging ? '#dcfce7' : (isActive ? '#fef3c7' : '#ffffff');
+      ctx.strokeStyle = isDragging ? '#16a34a' : (isActive ? '#f59e0b' : '#d1d5db');
+      ctx.lineWidth = isDragging ? 3 : 2;
 
       ctx.fillRect(labelX - bgWidth / 2, labelY - bgHeight / 2, bgWidth, bgHeight);
       ctx.strokeRect(labelX - bgWidth / 2, labelY - bgHeight / 2, bgWidth, bgHeight);
 
       // Draw label text
-      ctx.fillStyle = editingWall === index ? '#92400e' : '#374151';
+      ctx.fillStyle = isDragging ? '#166534' : (isActive ? '#92400e' : '#374151');
       ctx.fillText(labelText, labelX, labelY);
     });
   };
@@ -263,9 +267,13 @@ export function CanvasRenderer({
     const clickedWall = findWallLabelAt(mousePos);
     if (clickedWall !== -1) {
       setEditingWall(clickedWall);
+      setIsDraggingWall(true);
+      setDragStart(screenToWorld(mousePos));
     } else {
       // Clicking elsewhere cancels edit mode
       setEditingWall(null);
+      setIsDraggingWall(false);
+      setDragStart(null);
     }
   };
 
@@ -283,11 +291,21 @@ export function CanvasRenderer({
       const deltaY = mousePos.y - lastPan.y;
       setPan(prev => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
       setLastPan(mousePos);
+    } else if (isDraggingWall && editingWall !== null && dragStart) {
+      // Handle wall dragging
+      const currentWorldPos = screenToWorld(mousePos);
+      const deltaX = currentWorldPos.x - dragStart.x;
+      const deltaY = currentWorldPos.y - dragStart.y;
+
+      moveWall(editingWall, deltaX, deltaY);
+      setDragStart(currentWorldPos);
     }
   };
 
   const handleMouseUp = () => {
     setIsPanning(false);
+    setIsDraggingWall(false);
+    setDragStart(null);
   };
 
 
@@ -313,6 +331,166 @@ export function CanvasRenderer({
       }
     }
     return -1;
+  };
+
+  const isWallVertical = (wallIndex: number): boolean => {
+    const vertices = convertShapeToPolygon(shape);
+    if (vertices.length === 0) return false;
+
+    const current = vertices[wallIndex];
+    const next = vertices[(wallIndex + 1) % vertices.length];
+
+    // Check if the wall is more vertical than horizontal
+    const deltaX = Math.abs(next.x - current.x);
+    const deltaY = Math.abs(next.y - current.y);
+
+    return deltaY > deltaX;
+  };
+
+  const updateLShapeFromVertices = (vertices: Point[]) => {
+    if (vertices.length !== 6) return;
+
+    // L-shape vertices:
+    // 0: (0, 0) - bottom left
+    // 1: (width1, 0) - bottom right of first section
+    // 2: (width1, height1) - top right of first section
+    // 3: (width1 + width2, height1) - bottom right of second section
+    // 4: (width1 + width2, height1 + height2) - top right of second section
+    // 5: (0, height1 + height2) - top left
+
+    const bottomLeft = vertices[0];
+    const bottomRight1 = vertices[1];
+    const topRight1 = vertices[2];
+    const bottomRight2 = vertices[3];
+    const topRight2 = vertices[4];
+    const topLeft = vertices[5];
+
+    // Calculate L-shape parameters from vertices
+    const width1 = bottomRight1.x - bottomLeft.x;
+    const height1 = topRight1.y - bottomRight1.y;
+    const width2 = bottomRight2.x - bottomRight1.x;
+    const height2 = topRight2.y - topRight1.y;
+
+    // Ensure positive dimensions
+    if (width1 > 0 && height1 > 0 && width2 > 0 && height2 > 0) {
+      const newShape = {
+        type: 'l-shape' as const,
+        width1: Math.abs(width1),
+        height1: Math.abs(height1),
+        width2: Math.abs(width2),
+        height2: Math.abs(height2)
+      };
+      onShapeChange(newShape);
+    }
+  };
+
+  const moveWall = (wallIndex: number, deltaX: number, deltaY: number) => {
+    if (shape.type === 'rectangle') {
+      moveRectangleWall(wallIndex, deltaX, deltaY);
+    } else if (shape.type === 'l-shape') {
+      moveLShapeWall(wallIndex, deltaX, deltaY);
+    }
+  };
+
+  const moveRectangleWall = (wallIndex: number, deltaX: number, deltaY: number) => {
+    const vertices = convertShapeToPolygon(shape);
+    if (vertices.length === 0) return;
+
+    const isVertical = isWallVertical(wallIndex);
+    const newVertices = [...vertices];
+
+    if (isVertical) {
+      // For vertical walls, only allow horizontal movement
+      const current = vertices[wallIndex];
+      const next = vertices[(wallIndex + 1) % vertices.length];
+
+      newVertices[wallIndex] = { ...current, x: current.x + deltaX };
+      newVertices[(wallIndex + 1) % vertices.length] = { ...next, x: next.x + deltaX };
+    } else {
+      // For horizontal walls, only allow vertical movement
+      const current = vertices[wallIndex];
+      const next = vertices[(wallIndex + 1) % vertices.length];
+
+      newVertices[wallIndex] = { ...current, y: current.y + deltaY };
+      newVertices[(wallIndex + 1) % vertices.length] = { ...next, y: next.y + deltaY };
+    }
+
+    const bounds = getRoomBounds(newVertices);
+    const newShape = {
+      type: 'rectangle' as const,
+      width: bounds.maxX - bounds.minX,
+      height: bounds.maxY - bounds.minY
+    };
+    onShapeChange(newShape);
+  };
+
+  const moveLShapeWall = (wallIndex: number, deltaX: number, deltaY: number) => {
+    if (shape.type !== 'l-shape') return;
+
+    const isVertical = isWallVertical(wallIndex);
+    const currentShape = shape;
+    let newShape = { ...currentShape };
+
+    // L-shape wall mapping (based on lShapeToPolygon):
+    // Wall 0: bottom edge of first section (0,0) -> (width1,0)
+    // Wall 1: right edge of first section (width1,0) -> (width1,height1)
+    // Wall 2: bottom edge of second section (width1,height1) -> (width1+width2,height1)
+    // Wall 3: right edge of second section (width1+width2,height1) -> (width1+width2,height1+height2)
+    // Wall 4: top edge (width1+width2,height1+height2) -> (0,height1+height2)
+    // Wall 5: left edge (0,height1+height2) -> (0,0)
+
+    switch (wallIndex) {
+      case 0: // Bottom edge of first section - move horizontally affects width1
+        if (!isVertical && deltaY !== 0) {
+          // Can't move this wall vertically as it would break L-shape
+          return;
+        }
+        if (isVertical && deltaX !== 0) {
+          newShape.width1 = Math.max(0.5, currentShape.width1 + deltaX);
+        }
+        break;
+
+      case 1: // Right edge of first section - move vertically affects height1
+        if (isVertical && deltaX !== 0) {
+          newShape.width1 = Math.max(0.5, currentShape.width1 + deltaX);
+        }
+        if (!isVertical && deltaY !== 0) {
+          newShape.height1 = Math.max(0.5, currentShape.height1 + deltaY);
+        }
+        break;
+
+      case 2: // Bottom edge of second section - move horizontally affects width2
+        if (!isVertical && deltaY !== 0) {
+          newShape.height1 = Math.max(0.5, currentShape.height1 + deltaY);
+        }
+        if (isVertical && deltaX !== 0) {
+          newShape.width2 = Math.max(0.5, currentShape.width2 + deltaX);
+        }
+        break;
+
+      case 3: // Right edge of second section - move vertically affects height2
+        if (isVertical && deltaX !== 0) {
+          newShape.width2 = Math.max(0.5, currentShape.width2 + deltaX);
+        }
+        if (!isVertical && deltaY !== 0) {
+          newShape.height2 = Math.max(0.5, currentShape.height2 + deltaY);
+        }
+        break;
+
+      case 4: // Top edge - move vertically affects both heights
+        if (!isVertical && deltaY !== 0) {
+          newShape.height2 = Math.max(0.5, currentShape.height2 + deltaY);
+        }
+        break;
+
+      case 5: // Left edge - move horizontally would break L-shape
+        if (!isVertical && deltaY !== 0) {
+          newShape.height2 = Math.max(0.5, currentShape.height2 + deltaY);
+        }
+        break;
+    }
+
+    onShapeChange(newShape);
   };
 
   // Auto-center room to canvas on shape change
