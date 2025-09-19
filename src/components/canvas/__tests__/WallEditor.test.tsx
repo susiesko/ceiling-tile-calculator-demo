@@ -69,7 +69,8 @@ describe('WallEditor', () => {
         />
       )
 
-      expect(screen.getByDisplayValue("10' 6\"")).toBeInTheDocument()
+      expect(screen.getByDisplayValue("10")).toBeInTheDocument() // feet
+      expect(screen.getByDisplayValue("6.0")).toBeInTheDocument() // inches
     })
 
 
@@ -87,9 +88,9 @@ describe('WallEditor', () => {
         />
       )
 
-      const input = screen.getByDisplayValue("10'")
-      await user.clear(input)
-      await user.type(input, "12'")
+      const feetInput = screen.getByDisplayValue("10")
+      await user.clear(feetInput)
+      await user.type(feetInput, "12")
 
       const updateButton = screen.getByText('Update Wall')
       await user.click(updateButton)
@@ -116,9 +117,9 @@ describe('WallEditor', () => {
         />
       )
 
-      const input = screen.getByDisplayValue("8'")
-      await user.clear(input)
-      await user.type(input, "10'")
+      const feetInput = screen.getByDisplayValue("8")
+      await user.clear(feetInput)
+      await user.type(feetInput, "10")
 
       const updateButton = screen.getByText('Update Wall')
       await user.click(updateButton)
@@ -169,9 +170,9 @@ describe('WallEditor', () => {
         />
       )
 
-      const input = screen.getByDisplayValue("10'")
-      await user.clear(input)
-      await user.type(input, "12'")
+      const feetInput = screen.getByDisplayValue("10")
+      await user.clear(feetInput)
+      await user.type(feetInput, "12")
 
       const updateButton = screen.getByText('Update Wall')
       await user.click(updateButton)
@@ -199,9 +200,9 @@ describe('WallEditor', () => {
         />
       )
 
-      const input = screen.getByDisplayValue("6'")
-      await user.clear(input)
-      await user.type(input, "8'")
+      const feetInput = screen.getByDisplayValue("6")
+      await user.clear(feetInput)
+      await user.type(feetInput, "8")
 
       const updateButton = screen.getByText('Update Wall')
       await user.click(updateButton)
@@ -239,9 +240,9 @@ describe('WallEditor', () => {
         />
       )
 
-      const input = screen.getByDisplayValue("10'")
-      await user.clear(input)
-      await user.type(input, "0")
+      const feetInput = screen.getByDisplayValue("10")
+      await user.clear(feetInput)
+      await user.type(feetInput, "0")
 
       const updateButton = screen.getByText('Update Wall')
       await user.click(updateButton)
@@ -251,7 +252,7 @@ describe('WallEditor', () => {
       expect(mockOnClose).not.toHaveBeenCalled()
     })
 
-    it('should handle various input formats', async () => {
+    it('should handle feet and inches inputs', async () => {
       const user = userEvent.setup()
 
       render(
@@ -265,9 +266,11 @@ describe('WallEditor', () => {
         />
       )
 
-      const input = screen.getByDisplayValue("10'")
-      await user.clear(input)
-      await user.type(input, "10' 6\"")
+      const feetInput = screen.getByDisplayValue("10")
+      const inchesInput = screen.getByDisplayValue("0.0")
+
+      await user.clear(inchesInput)
+      await user.type(inchesInput, "6")
 
       const updateButton = screen.getByText('Update Wall')
       await user.click(updateButton)
@@ -320,8 +323,8 @@ describe('WallEditor', () => {
         />
       )
 
-      const input = screen.getByDisplayValue("10'")
-      expect(input).toHaveFocus()
+      const feetInput = screen.getByDisplayValue("10")
+      expect(feetInput).toHaveFocus()
     })
 
     it('should show appropriate placeholder text', () => {
@@ -336,11 +339,11 @@ describe('WallEditor', () => {
         />
       )
 
-      expect(screen.getByPlaceholderText("e.g., 10' 6\"")).toBeInTheDocument()
+      expect(screen.getAllByPlaceholderText("0")).toHaveLength(2) // feet and inches placeholders
     })
 
 
-    it('should show format examples for feet', () => {
+    it('should show feet and inches labels', () => {
       render(
         <WallEditor
           wallIndex={0}
@@ -352,7 +355,8 @@ describe('WallEditor', () => {
         />
       )
 
-      expect(screen.getByText("Format examples: 10', 10' 6\", 10.5")).toBeInTheDocument()
+      expect(screen.getByText("Feet")).toBeInTheDocument()
+      expect(screen.getByText("Inches")).toBeInTheDocument()
     })
   })
 })

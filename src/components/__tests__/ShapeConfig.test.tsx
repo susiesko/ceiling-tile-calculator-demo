@@ -114,8 +114,10 @@ describe('ShapeConfig', () => {
         />
       )
 
-      expect(screen.getByText('Width (ft)')).toBeInTheDocument()
-      expect(screen.getByText('Height (ft)')).toBeInTheDocument()
+      expect(screen.getByText('Width')).toBeInTheDocument()
+      expect(screen.getByText('Height')).toBeInTheDocument()
+      expect(screen.getAllByText('Feet')).toHaveLength(2)
+      expect(screen.getAllByText('Inches')).toHaveLength(2)
     })
 
 
@@ -135,16 +137,20 @@ describe('ShapeConfig', () => {
         />
       )
 
-      const widthInput = screen.getByDisplayValue('10')
-      await user.clear(widthInput)
-      await user.type(widthInput, '12')
+      // Find the width feet input (first input with value '10')
+      const widthFeetInputs = screen.getAllByDisplayValue('10')
+      const widthFeetInput = widthFeetInputs[0] // First one should be width feet
+      await user.clear(widthFeetInput)
+      await user.type(widthFeetInput, '12')
 
-      // Check that onShapeChange was called and the final value shows typing worked
+      // Trigger the onBlur event to save the change
+      fireEvent.blur(widthFeetInput)
+
+      // Check that onShapeChange was called
       expect(mockOnShapeChange).toHaveBeenCalled()
       const lastCall = mockOnShapeChange.mock.calls[mockOnShapeChange.mock.calls.length - 1][0]
       expect(lastCall.type).toBe('rectangle')
-      // Accept either 12 (ideal) or 102 (test environment quirk where "1" + "02" = "102")
-      expect([12, 102]).toContain(lastCall.width)
+      expect(lastCall.width).toBe(12)
       expect(lastCall.height).toBe(8)
     })
   })
@@ -212,16 +218,20 @@ describe('ShapeConfig', () => {
         />
       )
 
-      const width1Input = screen.getByDisplayValue('10')
-      await user.clear(width1Input)
-      await user.type(width1Input, '12')
+      // Find the width1 feet input (first input with value '10')
+      const width1FeetInputs = screen.getAllByDisplayValue('10')
+      const width1FeetInput = width1FeetInputs[0] // First one should be width1 feet
+      await user.clear(width1FeetInput)
+      await user.type(width1FeetInput, '12')
 
-      // Check that onShapeChange was called and the final value shows typing worked
+      // Trigger the onBlur event to save the change
+      fireEvent.blur(width1FeetInput)
+
+      // Check that onShapeChange was called
       expect(mockOnShapeChange).toHaveBeenCalled()
       const lastCall = mockOnShapeChange.mock.calls[mockOnShapeChange.mock.calls.length - 1][0]
       expect(lastCall.type).toBe('l-shape')
-      // Accept either 12 (ideal) or 102 (test environment quirk where "1" + "02" = "102")
-      expect([12, 102]).toContain(lastCall.width1)
+      expect(lastCall.width1).toBe(12)
       expect(lastCall.height1).toBe(6)
       expect(lastCall.width2).toBe(4)
       expect(lastCall.height2).toBe(3)
@@ -245,8 +255,13 @@ describe('ShapeConfig', () => {
         />
       )
 
-      const widthInput = screen.getByDisplayValue('10')
-      await user.clear(widthInput)
+      // Find the width feet input (first input with value '10')
+      const widthFeetInputs = screen.getAllByDisplayValue('10')
+      const widthFeetInput = widthFeetInputs[0]
+      await user.clear(widthFeetInput)
+
+      // Trigger the onBlur event to save the change
+      fireEvent.blur(widthFeetInput)
 
       // Should call with 0 when empty
       expect(mockOnShapeChange).toHaveBeenCalledWith({
@@ -272,10 +287,16 @@ describe('ShapeConfig', () => {
         />
       )
 
-      const widthInput = screen.getByDisplayValue('10')
-      await user.clear(widthInput)
-      await user.type(widthInput, '10.5')
+      // Find all inches inputs and get the first one (width inches)
+      const widthInchesInputs = screen.getAllByDisplayValue('0.0')
+      const widthInchesInput = widthInchesInputs[0] // First one should be width inches
+      await user.clear(widthInchesInput)
+      await user.type(widthInchesInput, '6')
 
+      // Trigger the onBlur event to save the change
+      fireEvent.blur(widthInchesInput)
+
+      // Should convert 10 feet + 6 inches = 10.5 feet
       expect(mockOnShapeChange).toHaveBeenCalledWith({
         type: 'rectangle',
         width: 10.5,

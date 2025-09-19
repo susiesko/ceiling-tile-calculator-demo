@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Shape, Units } from '../../types';
-import { formatFeetInches, parseFeetInches } from '../../utils/units';
+import {FormEvent, useEffect, useState} from 'react';
+import {Shape, Units} from '../../types';
 
 interface WallEditorProps {
   wallIndex: number;
@@ -12,32 +11,42 @@ interface WallEditorProps {
 }
 
 export function WallEditor({
-  wallIndex,
-  currentLength,
-  shape,
-  units,
-  onShapeChange,
-  onClose
-}: WallEditorProps) {
-  const [inputValue, setInputValue] = useState('');
+                             wallIndex,
+                             currentLength,
+                             shape,
+                             units,
+                             onShapeChange,
+                             onClose
+                           }: WallEditorProps) {
+  const [feet, setFeet] = useState('');
+  const [inches, setInches] = useState('');
 
   useEffect(() => {
     if (units === 'feet') {
-      setInputValue(formatFeetInches(currentLength));
+      const totalInches = currentLength * 12;
+      const feetPart = Math.floor(totalInches / 12);
+      const inchesPart = totalInches % 12;
+
+      setFeet(feetPart.toString());
+      setInches(inchesPart.toFixed(1));
     } else {
-      setInputValue(currentLength.toFixed(1));
+      setFeet(Math.floor(currentLength).toString());
+      setInches('0');
     }
   }, [currentLength, units]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    let newLength: number;
-    if (units === 'feet') {
-      newLength = parseFeetInches(inputValue);
-    } else {
-      newLength = parseFloat(inputValue) || 0;
+    const feetValue = parseFloat(feet) || 0;
+    const inchesValue = parseFloat(inches) || 0;
+
+    if (feetValue < 0 || inchesValue < 0 || inchesValue >= 12) {
+      alert('Please enter valid measurements (inches must be less than 12)');
+      return;
     }
+
+    const newLength = feetValue + (inchesValue / 12);
 
     if (newLength <= 0) {
       alert('Wall length must be greater than 0');
@@ -51,7 +60,7 @@ export function WallEditor({
   const updateWallLength = (newLength: number) => {
     if (shape.type === 'rectangle') {
       // For rectangle, walls are: top, right, bottom, left
-      const newShape = { ...shape };
+      const newShape = {...shape};
       if (wallIndex === 0 || wallIndex === 2) {
         // Top or bottom wall - change width
         newShape.width = newLength;
@@ -69,7 +78,7 @@ export function WallEditor({
   const updateLShapeWall = (newLength: number) => {
     if (shape.type !== 'l-shape') return;
 
-    const newShape = { ...shape };
+    const newShape = {...shape};
 
     // L-shape walls in order: bottom-left to bottom-right, up, right, down, left, up-left
     switch (wallIndex) {
@@ -132,21 +141,36 @@ export function WallEditor({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-2">
-              New Length (feet & inches)
+              New Length
             </label>
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder={units === 'feet' ? "e.g., 10' 6\"" : "e.g., 3.2"}
-              autoFocus
-            />
-            {units === 'feet' && (
-              <p className="text-xs text-gray-500 mt-1">
-                Format examples: 10', 10' 6", 10.5
-              </p>
-            )}
+            <div className="flex space-x-2">
+              <div className="flex-1">
+                <label className="block text-xs text-gray-500 mb-1">Feet</label>
+                <input
+                  type="number"
+                  value={feet}
+                  onChange={(e) => setFeet(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="0"
+                  min="0"
+                  step="1"
+                  autoFocus
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs text-gray-500 mb-1">Inches</label>
+                <input
+                  type="number"
+                  value={inches}
+                  onChange={(e) => setInches(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="0"
+                  min="0"
+                  max="11.9"
+                  step="0.1"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="flex space-x-3">
