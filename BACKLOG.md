@@ -1,9 +1,14 @@
 # BACKLOG
-* [ ] The tile size buttons (2 x 2 and 2 x 4) should be represented with images or svgs.
-* [ ] The tile orientation for 2 x 4 tiles should also be represented with images.
+* [ ] Update the tile orientation section.
+  * [ ] The tile orientation config section should only display if 2 x 4 is selected.
+  * [ ] The tile orientation (vertical or horizontal) for 2 x 4 tiles should also be represented with images.
+  * [ ] The grid should rotate with the selected tile orientation.
+* [ ] Update the wall length inputs.  
+  * [ ] For each wall, there should be a feet input and an inches input.  
 * [ ] Wall labels should be shown in a measurement of feet and inches.  So 5.5 feet should display as 5'6"
-    * [ ] Inches portion of label should round to the nearest 10th place.
-    * [ ] If the measurement is a whole amount of feet, do not display the inches portion. (6'0" should just display as 6')
+  * [ ] Inches portion of label should round to the nearest 10th place.
+  * [ ] If the measurement is a whole amount of feet, do not display the inches portion. (6'0" should just display as 6')
+* [ ] Add CSS styling to the ceiling tile calculator.  
 
 # COMPLETED
 
@@ -20,3 +25,4 @@
   * [x] The labels should "activate" or change colors when clicked.
   * [x] If the wall is vertical, it should only move horizontally (left to right).
   * [x] If the wall is horizontal, it should only move vertically (up and down).
+* [x] The tile size buttons (2 x 2 and 2 x 4) should be represented with clickable images or svg squares/rectangles instead of buttons.

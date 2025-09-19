@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { TileConfig, Units, TileSize, TileOrientation } from '../types';
 
 interface TileControlsProps {
@@ -9,6 +9,56 @@ interface TileControlsProps {
   onPriceChange: (price?: number) => void;
   className?: string;
 }
+
+const TileSizeIcon = ({ size, isSelected }: { size: TileSize; isSelected: boolean }) => {
+  const fillColor = isSelected ? '#3b82f6' : '#e5e7eb';
+
+  if (size === '2x2') {
+    return (
+      <svg width="120" height="120" viewBox="0 0 120 120" className="mx-auto">
+        <rect
+          x="15"
+          y="15"
+          width="90"
+          height="90"
+          fill={fillColor}
+          rx="8"
+        />
+        <text
+          x="60"
+          y="67"
+          textAnchor="middle"
+          className="text-lg font-bold"
+          fill={isSelected ? '#ffffff' : '#6b7280'}
+        >
+          2×2
+        </text>
+      </svg>
+    );
+  } else {
+    return (
+      <svg width="120" height="120" viewBox="0 0 120 120" className="mx-auto">
+        <rect
+          x="37.5"
+          y="15"
+          width="45"
+          height="90"
+          fill={fillColor}
+          rx="8"
+        />
+        <text
+          x="60"
+          y="67"
+          textAnchor="middle"
+          className="text-lg font-bold"
+          fill={isSelected ? '#ffffff' : '#6b7280'}
+        >
+          2×4
+        </text>
+      </svg>
+    );
+  }
+};
 
 export function TileControls({
   tileConfig,
@@ -29,21 +79,18 @@ export function TileControls({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Tile Size
         </label>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-6">
           {(['2x2', '2x4'] as TileSize[]).map((size) => (
-            <button
+            <div
               key={size}
               onClick={() => onTileConfigChange({ size })}
-              className={`
-                p-3 rounded-lg border-2 transition-all text-center
-                ${tileConfig.size === size
-                  ? 'border-primary-500 bg-primary-50 text-primary-700'
-                  : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                }
-              `}
+              className="cursor-pointer flex flex-col items-center space-y-3 transition-all hover:scale-105"
             >
-              {size} {unitLabel}
-            </button>
+              <TileSizeIcon size={size} isSelected={tileConfig.size === size} />
+              <span className={`text-sm font-medium ${
+                tileConfig.size === size ? 'text-primary-700' : 'text-gray-600'
+              }`}/>
+            </div>
           ))}
         </div>
       </div>
