@@ -47,7 +47,7 @@ describe('ShapeConfig', () => {
       )
 
       const rectangleButton = screen.getByText('Rectangle').closest('button')
-      expect(rectangleButton).toHaveClass('border-primary-500')
+      expect(rectangleButton).toHaveClass('border-blue-500')
     })
 
     it('should switch shape types when clicked', async () => {

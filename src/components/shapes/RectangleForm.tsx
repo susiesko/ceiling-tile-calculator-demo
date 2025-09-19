@@ -53,14 +53,14 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
     };
 
     return (
-        <div className={`space-y-4 ${className}`}>
-            <h4 className="text-md font-medium text-gray-700">Rectangle Dimensions</h4>
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">Width</label>
-                    <div className="flex space-x-2">
-                        <div className="flex-1">
-                            <label className="block text-xs text-gray-500 mb-1">Feet</label>
+        <div className={`space-y-6 ${className}`}>
+            <h4 className="text-lg font-semibold text-neutral-700">Rectangle Dimensions</h4>
+            <div className="space-y-6">
+                <div className="space-y-3">
+                    <label className="block text-sm font-bold text-neutral-700 mb-3">Width</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-2">Feet</label>
                             <input
                                 type="number"
                                 min="0"
@@ -68,12 +68,12 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 value={widthFeet}
                                 onChange={(e) => setWidthFeet(e.target.value)}
                                 onBlur={handleWidthChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300 text-lg font-medium"
                                 placeholder="0"
                             />
                         </div>
-                        <div className="flex-1">
-                            <label className="block text-xs text-gray-500 mb-1">Inches</label>
+                        <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-2">Inches</label>
                             <input
                                 type="number"
                                 min="0"
@@ -82,17 +82,17 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 value={widthInches}
                                 onChange={(e) => setWidthInches(e.target.value)}
                                 onBlur={handleWidthChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300 text-lg font-medium"
                                 placeholder="0"
                             />
                         </div>
                     </div>
                 </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">Height</label>
-                    <div className="flex space-x-2">
-                        <div className="flex-1">
-                            <label className="block text-xs text-gray-500 mb-1">Feet</label>
+                <div className="space-y-3">
+                    <label className="block text-sm font-bold text-neutral-700 mb-3">Height</label>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-2">Feet</label>
                             <input
                                 type="number"
                                 min="0"
@@ -100,12 +100,12 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 value={heightFeet}
                                 onChange={(e) => setHeightFeet(e.target.value)}
                                 onBlur={handleHeightChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300 text-lg font-medium"
                                 placeholder="0"
                             />
                         </div>
-                        <div className="flex-1">
-                            <label className="block text-xs text-gray-500 mb-1">Inches</label>
+                        <div>
+                            <label className="block text-xs font-medium text-neutral-500 mb-2">Inches</label>
                             <input
                                 type="number"
                                 min="0"
@@ -114,7 +114,7 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 value={heightInches}
                                 onChange={(e) => setHeightInches(e.target.value)}
                                 onBlur={handleHeightChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300 text-lg font-medium"
                                 placeholder="0"
                             />
                         </div>
