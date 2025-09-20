@@ -57,3 +57,4 @@ Each time you finish a task from the "backlog" section, move it to the "complete
 * [x] Add CSS styling to the ceiling tile calculator.
     * [x] Use tailwind.
 * [x] The walls should be labeled alphabetically, starting with A in the top left corner and going clockwise.
+* [x] BUG: The A and F wall on the L shape do not move when their labels are dragged.

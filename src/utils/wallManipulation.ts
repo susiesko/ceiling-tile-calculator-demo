@@ -110,60 +110,51 @@ export function moveLShapeWall(
   let newShape = { ...currentShape };
 
   // L-shape wall mapping (based on lShapeToPolygon):
-  // Wall 0: bottom edge of first section (0,0) -> (width1,0)
-  // Wall 1: right edge of first section (width1,0) -> (width1,height1)
-  // Wall 2: bottom edge of second section (width1,height1) -> (width1+width2,height1)
-  // Wall 3: right edge of second section (width1+width2,height1) -> (width1+width2,height1+height2)
-  // Wall 4: top edge (width1+width2,height1+height2) -> (0,height1+height2)
-  // Wall 5: left edge (0,height1+height2) -> (0,0)
+  // Wall 0 (A): top edge (0,0) -> (width1,0) - horizontal wall, move vertically affects position
+  // Wall 1 (B): right edge of first section (width1,0) -> (width1,height1) - vertical wall
+  // Wall 2 (C): inner horizontal edge (width1,height1) -> (width1+width2,height1) - horizontal wall
+  // Wall 3 (D): right edge of second section (width1+width2,height1) -> (width1+width2,height1+height2) - vertical wall
+  // Wall 4 (E): bottom edge (width1+width2,height1+height2) -> (0,height1+height2) - horizontal wall
+  // Wall 5 (F): left edge (0,height1+height2) -> (0,0) - vertical wall
 
   switch (wallIndex) {
-    case 0: // Bottom edge of first section - move horizontally affects width1
+    case 0: // Wall A: Top edge - horizontal wall
       if (!isVertical && deltaY !== 0) {
-        // Can't move this wall vertically as it would break L-shape
-        return;
+        // Moving top edge down increases height1, moving up decreases it
+        newShape.height1 = Math.max(0.5, currentShape.height1 - deltaY);
+        newShape.height2 = Math.max(0.5, currentShape.height2 - deltaY);
       }
+      break;
+
+    case 1: // Wall B: Right edge of first section - vertical wall
       if (isVertical && deltaX !== 0) {
         newShape.width1 = Math.max(0.5, currentShape.width1 + deltaX);
       }
       break;
 
-    case 1: // Right edge of first section - move vertically affects height1
-      if (isVertical && deltaX !== 0) {
-        newShape.width1 = Math.max(0.5, currentShape.width1 + deltaX);
-      }
+    case 2: // Wall C: Inner horizontal edge - horizontal wall
       if (!isVertical && deltaY !== 0) {
         newShape.height1 = Math.max(0.5, currentShape.height1 + deltaY);
       }
       break;
 
-    case 2: // Bottom edge of second section - move horizontally affects width2
+    case 3: // Wall D: Right edge of second section - vertical wall
+      if (isVertical && deltaX !== 0) {
+        newShape.width2 = Math.max(0.5, currentShape.width2 + deltaX);
+      }
+      break;
+
+    case 4: // Wall E: Bottom edge - horizontal wall
       if (!isVertical && deltaY !== 0) {
         newShape.height1 = Math.max(0.5, currentShape.height1 + deltaY);
+        newShape.height2 = Math.max(0.5, currentShape.height2 + deltaY);
       }
+      break;
+
+    case 5: // Wall F: Left edge - vertical wall
       if (isVertical && deltaX !== 0) {
-        newShape.width2 = Math.max(0.5, currentShape.width2 + deltaX);
-      }
-      break;
-
-    case 3: // Right edge of second section - move vertically affects height2
-      if (isVertical && deltaX !== 0) {
-        newShape.width2 = Math.max(0.5, currentShape.width2 + deltaX);
-      }
-      if (!isVertical && deltaY !== 0) {
-        newShape.height2 = Math.max(0.5, currentShape.height2 + deltaY);
-      }
-      break;
-
-    case 4: // Top edge - move vertically affects both heights
-      if (!isVertical && deltaY !== 0) {
-        newShape.height2 = Math.max(0.5, currentShape.height2 + deltaY);
-      }
-      break;
-
-    case 5: // Left edge - move horizontally would break L-shape
-      if (!isVertical && deltaY !== 0) {
-        newShape.height2 = Math.max(0.5, currentShape.height2 + deltaY);
+        // Moving left edge right decreases width1, moving left increases it
+        newShape.width1 = Math.max(0.5, currentShape.width1 - deltaX);
       }
       break;
   }
