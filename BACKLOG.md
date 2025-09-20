@@ -56,3 +56,4 @@ Each time you finish a task from the "backlog" section, move it to the "complete
     * [x] For each wall, there should be a feet input and an inches input.
 * [x] Add CSS styling to the ceiling tile calculator.
     * [x] Use tailwind.
+* [x] The walls should be labeled alphabetically, starting with A in the top left corner and going clockwise.

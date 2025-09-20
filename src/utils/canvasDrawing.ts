@@ -10,6 +10,7 @@ export interface WallLabel {
   length: number;
   angle: number;
   wallIndex: number;
+  letter: string;
 }
 
 export function drawGrid(ctx: CanvasRenderingContext2D, tileConfig: TileConfig) {
@@ -116,19 +117,16 @@ export function drawWallLabels(
   isDraggingWall: boolean,
   worldToScreen: (point: Point) => Point
 ) {
-  ctx.fillStyle = '#374151';
   ctx.strokeStyle = '#ffffff';
   ctx.lineWidth = 3;
-  ctx.font = '14px system-ui, sans-serif';
   ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
 
   labels.forEach((label) => {
     const screenPos = worldToScreen(label.midpoint);
-    const labelText = units === 'feet' ? formatFeetInches(label.length) : `${label.length.toFixed(1)}m`;
+    const lengthText = units === 'feet' ? formatFeetInches(label.length) : `${label.length.toFixed(1)}m`;
 
     // Offset label from wall
-    const offsetDistance = 25;
+    const offsetDistance = 35;
     const normalAngle = label.angle + Math.PI / 2;
     const offsetX = Math.cos(normalAngle) * offsetDistance;
     const offsetY = Math.sin(normalAngle) * offsetDistance;
@@ -136,15 +134,20 @@ export function drawWallLabels(
     const labelX = screenPos.x + offsetX;
     const labelY = screenPos.y + offsetY;
 
-    // Draw label background
-    const metrics = ctx.measureText(labelText);
+    // Measure text for background sizing
+    ctx.font = '16px system-ui, sans-serif';
+    const letterMetrics = ctx.measureText(label.letter);
+    ctx.font = '12px system-ui, sans-serif';
+    const lengthMetrics = ctx.measureText(lengthText);
+
     const padding = 8;
-    const bgWidth = metrics.width + padding * 2;
-    const bgHeight = 24;
+    const bgWidth = Math.max(letterMetrics.width, lengthMetrics.width) + padding * 2;
+    const bgHeight = 40; // Taller to accommodate both letter and length
 
     const isActive = false;
     const isDragging = isActive && isDraggingWall;
 
+    // Draw label background
     ctx.fillStyle = isDragging ? '#dcfce7' : (isActive ? '#fef3c7' : '#ffffff');
     ctx.strokeStyle = isDragging ? '#16a34a' : (isActive ? '#f59e0b' : '#d1d5db');
     ctx.lineWidth = isDragging ? 3 : 2;
@@ -152,9 +155,16 @@ export function drawWallLabels(
     ctx.fillRect(labelX - bgWidth / 2, labelY - bgHeight / 2, bgWidth, bgHeight);
     ctx.strokeRect(labelX - bgWidth / 2, labelY - bgHeight / 2, bgWidth, bgHeight);
 
-    // Draw label text
-    ctx.fillStyle = isDragging ? '#166534' : (isActive ? '#92400e' : '#374151');
-    ctx.fillText(labelText, labelX, labelY);
+    // Draw letter (larger, prominent)
+    ctx.fillStyle = isDragging ? '#166534' : (isActive ? '#92400e' : '#1f2937');
+    ctx.font = '16px system-ui, sans-serif';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label.letter, labelX, labelY - 8);
+
+    // Draw length measurement (smaller, below letter)
+    ctx.fillStyle = isDragging ? '#166534' : (isActive ? '#92400e' : '#6b7280');
+    ctx.font = '12px system-ui, sans-serif';
+    ctx.fillText(lengthText, labelX, labelY + 8);
   });
 }
 
@@ -176,11 +186,15 @@ export function calculateWallLabels(vertices: Point[]): WallLabel[] {
 
     const angle = Math.atan2(next.y - current.y, next.x - current.x);
 
+    // Generate alphabetical letter starting from A
+    const letter = String.fromCharCode(65 + i); // A=65, B=66, etc.
+
     labels.push({
       midpoint,
       length,
       angle,
-      wallIndex: i
+      wallIndex: i,
+      letter
     });
   }
 

@@ -46,8 +46,8 @@ describe('WallLengthAdjustments', () => {
         />
       )
 
-      expect(screen.getByText('Width')).toBeInTheDocument()
-      expect(screen.getByText('Height')).toBeInTheDocument()
+      expect(screen.getByText('Width (Walls A & C)')).toBeInTheDocument()
+      expect(screen.getByText('Height (Walls B & D)')).toBeInTheDocument()
       expect(screen.getAllByText('Feet')).toHaveLength(2)
       expect(screen.getAllByText('Inches')).toHaveLength(2)
     })
@@ -110,7 +110,7 @@ describe('WallLengthAdjustments', () => {
       expect(screen.getByDisplayValue('3')).toBeInTheDocument()
     })
 
-    it('should have descriptive labels for L-shape sections', () => {
+    it('should have wall labels for L-shape', () => {
       const shape: LShape = {
         type: 'l-shape',
         width1: 10,
@@ -127,8 +127,10 @@ describe('WallLengthAdjustments', () => {
         />
       )
 
-      expect(screen.getByText('Bottom horizontal section:')).toBeInTheDocument()
-      expect(screen.getByText('Top horizontal section:')).toBeInTheDocument()
+      expect(screen.getByText('Wall A')).toBeInTheDocument()
+      expect(screen.getByText('Wall B')).toBeInTheDocument()
+      expect(screen.getByText('Wall C')).toBeInTheDocument()
+      expect(screen.getByText('Wall D')).toBeInTheDocument()
     })
 
     it('should update L-shape when dimension changes', async () => {

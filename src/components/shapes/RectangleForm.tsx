@@ -22,7 +22,7 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
             <h4 className="text-lg font-semibold text-neutral-700">Rectangle Dimensions</h4>
             <div className="space-y-6">
                 <div className="space-y-3">
-                    <label className="block text-sm font-bold text-neutral-700 mb-3">Width</label>
+                    <label className="block text-sm font-bold text-neutral-700 mb-3">Width (Walls A & C)</label>
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-xs font-medium text-neutral-500 mb-2">Feet</label>
@@ -54,7 +54,7 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                     </div>
                 </div>
                 <div className="space-y-3">
-                    <label className="block text-sm font-bold text-neutral-700 mb-3">Height</label>
+                    <label className="block text-sm font-bold text-neutral-700 mb-3">Height (Walls B & D)</label>
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className="block text-xs font-medium text-neutral-500 mb-2">Feet</label>
