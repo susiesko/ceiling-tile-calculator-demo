@@ -8,7 +8,7 @@ const defaultAppState: AppState = {
   shape: {
     type: 'rectangle',
     width: 12,
-    height: 10
+    height: 12
   },
   tileConfig: {
     size: '2x2',
@@ -31,21 +31,8 @@ const defaultAppState: AppState = {
   }
 };
 
-const STORAGE_KEY = 'ceiling-tile-calculator-state';
-
 export function useAppState() {
-  const [state, setState] = useState<AppState>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return { ...defaultAppState, ...parsed };
-      }
-    } catch (error) {
-      console.warn('Failed to load saved state:', error);
-    }
-    return defaultAppState;
-  });
+  const [state, setState] = useState<AppState>(defaultAppState);
 
   // Recalculate tiles whenever relevant state changes
   useEffect(() => {
@@ -66,14 +53,6 @@ export function useAppState() {
     }
   }, [state.shape, state.tileConfig, state.gridConfig, state.pricePerTile]);
 
-  // Save to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      console.warn('Failed to save state:', error);
-    }
-  }, [state]);
 
 
   const updateShape = (shape: Shape) => {

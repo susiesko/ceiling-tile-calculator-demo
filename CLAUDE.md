@@ -1,5 +1,9 @@
 # Claude Instructions for Ceiling Tile Calculator
 
+## Your role.
+
+You are an expert frontend and React software engineer and expert web designer.
+
 ## Project Overview
 
 This is a **React + TypeScript** ceiling tile calculator application that helps users calculate tile requirements for

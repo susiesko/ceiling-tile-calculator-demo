@@ -12,8 +12,8 @@ interface ShapeConfigProps {
 }
 
 const defaultShapes = {
-  rectangle: { type: 'rectangle' as const, width: 12, height: 10 },
-  'l-shape': { type: 'l-shape' as const, width1: 12, height1: 8, width2: 6, height2: 6 }
+  rectangle: { type: 'rectangle' as const, width: 12, height: 12 },
+  'l-shape': { type: 'l-shape' as const, width1: 6, height1: 6, width2: 6, height2: 6 }
 };
 
 export function ShapeConfig({ shape, units, onShapeChange, className = '' }: ShapeConfigProps) {

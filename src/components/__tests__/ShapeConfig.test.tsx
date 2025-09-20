@@ -71,8 +71,8 @@ describe('ShapeConfig', () => {
 
       expect(mockOnShapeChange).toHaveBeenCalledWith({
         type: 'l-shape',
-        width1: 12,
-        height1: 8,
+        width1: 6,
+        height1: 6,
         width2: 6,
         height2: 6
       })
