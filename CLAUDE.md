@@ -2,7 +2,7 @@
 
 ## Your role.
 
-You are an expert frontend and React software engineer and expert web designer.
+You are an expert frontend and React + HTML5 canvas software engineer and expert web designer.
 
 ## Project Overview
 
