@@ -5,18 +5,20 @@ and tasks that still need to be done.
 
 Only do one task at a time. A task includes the top level and it's child tasks (the indented tasks below it).
 
-Each time you finish a task from the "backlog" section, move it to the "completed" section and mark it with an "x".
+Each time you finish a task from the "backlog" section, move it to bottom of the "completed" section and mark it with
+an "x".
 
 # BACKLOG
 
-* [ ] Updating the feet and inches textboxes should update the wall labels on the canvas.
-    * [ ] The walls should adjust as soon as the user has stopped typing for 1 sec.
+* [ ] BUG: The textboxes for the E and F walls of the L shaped room are missing.
 * [ ] The tile grid should be lined up with the grid on the canvas. The grid and tiles should be fixed to the canvas at
   all times.
 * [ ] Some cleanup
     * [ ] Get rid of price input.
     * [ ] Get rid of area information.
     * [ ] Get rid of scale text.
+* [ ] ENHANCEMENT: Update the L shaped room SVG on the button in Step 1 to be a bit bigger and look cleaner. It should
+  also be oriented to look like an L rather than be upside down.
 
 # COMPLETED
 
@@ -58,3 +60,5 @@ Each time you finish a task from the "backlog" section, move it to the "complete
     * [x] Use tailwind.
 * [x] The walls should be labeled alphabetically, starting with A in the top left corner and going clockwise.
 * [x] BUG: The A and F wall on the L shape do not move when their labels are dragged.
+* [x] Updating the feet and inches textboxes should update the wall labels on the canvas.
+    * [x] The walls should adjust as soon as the user has stopped typing for 1 sec.
