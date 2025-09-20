@@ -1,5 +1,5 @@
-import {useEffect, useState} from 'react';
 import {RectangleShape, Units} from '../../types';
+import {useFeetInchesInput} from '../../hooks/useFeetInchesInput';
 
 interface RectangleFormProps {
     shape: RectangleShape;
@@ -9,48 +9,13 @@ interface RectangleFormProps {
 }
 
 export function RectangleForm({shape, units, onChange, className = ''}: RectangleFormProps) {
-    const [widthFeet, setWidthFeet] = useState('');
-    const [widthInches, setWidthInches] = useState('');
-    const [heightFeet, setHeightFeet] = useState('');
-    const [heightInches, setHeightInches] = useState('');
+    const width = useFeetInchesInput(shape.width, (value) => {
+        onChange({ ...shape, width: value });
+    });
 
-    useEffect(() => {
-        // Convert current width to feet and inches
-        const widthTotalInches = shape.width * 12;
-        const widthFeetPart = Math.floor(widthTotalInches / 12);
-        const widthInchesPart = widthTotalInches % 12;
-
-        setWidthFeet(widthFeetPart.toString());
-        setWidthInches(widthInchesPart.toFixed(1));
-
-        // Convert current height to feet and inches
-        const heightTotalInches = shape.height * 12;
-        const heightFeetPart = Math.floor(heightTotalInches / 12);
-        const heightInchesPart = heightTotalInches % 12;
-
-        setHeightFeet(heightFeetPart.toString());
-        setHeightInches(heightInchesPart.toFixed(1));
-    }, [shape.width, shape.height]);
-
-    const handleWidthChange = () => {
-        const feet = parseFloat(widthFeet) || 0;
-        const inches = parseFloat(widthInches) || 0;
-        const totalFeet = feet + (inches / 12);
-        onChange({
-            ...shape,
-            width: totalFeet
-        });
-    };
-
-    const handleHeightChange = () => {
-        const feet = parseFloat(heightFeet) || 0;
-        const inches = parseFloat(heightInches) || 0;
-        const totalFeet = feet + (inches / 12);
-        onChange({
-            ...shape,
-            height: totalFeet
-        });
-    };
+    const height = useFeetInchesInput(shape.height, (value) => {
+        onChange({ ...shape, height: value });
+    });
 
     return (
         <div className={`space-y-6 ${className}`}>
@@ -65,9 +30,9 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 type="number"
                                 min="0"
                                 step="1"
-                                value={widthFeet}
-                                onChange={(e) => setWidthFeet(e.target.value)}
-                                onBlur={handleWidthChange}
+                                value={width.feet}
+                                onChange={(e) => width.setFeet(e.target.value)}
+                                onBlur={width.handleChange}
                                 className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300 text-lg font-medium"
                                 placeholder="0"
                             />
@@ -79,9 +44,9 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 min="0"
                                 max="11.9"
                                 step="0.1"
-                                value={widthInches}
-                                onChange={(e) => setWidthInches(e.target.value)}
-                                onBlur={handleWidthChange}
+                                value={width.inches}
+                                onChange={(e) => width.setInches(e.target.value)}
+                                onBlur={width.handleChange}
                                 className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300 text-lg font-medium"
                                 placeholder="0"
                             />
@@ -97,9 +62,9 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 type="number"
                                 min="0"
                                 step="1"
-                                value={heightFeet}
-                                onChange={(e) => setHeightFeet(e.target.value)}
-                                onBlur={handleHeightChange}
+                                value={height.feet}
+                                onChange={(e) => height.setFeet(e.target.value)}
+                                onBlur={height.handleChange}
                                 className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300 text-lg font-medium"
                                 placeholder="0"
                             />
@@ -111,9 +76,9 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 min="0"
                                 max="11.9"
                                 step="0.1"
-                                value={heightInches}
-                                onChange={(e) => setHeightInches(e.target.value)}
-                                onBlur={handleHeightChange}
+                                value={height.inches}
+                                onChange={(e) => height.setInches(e.target.value)}
+                                onBlur={height.handleChange}
                                 className="w-full px-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300 text-lg font-medium"
                                 placeholder="0"
                             />

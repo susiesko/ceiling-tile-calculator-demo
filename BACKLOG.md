@@ -8,12 +8,6 @@ Only do one task at a time. A task includes the top level and it's child tasks (
 Each time you finish a task from the "backlog" section, move it to the "completed" section and mark it with an "x".
 
 # BACKLOG
-* [ ] Do a code cleanup:
-    * Refactor any code that is messy or hard to read.
-        * Extract logic into other files if necessary.
-    * Remove any unused code or comments.
-    * Ensure that the code follows best practices and is well-organized.
-    * Remove console.logs.
 * [ ] The textboxes that update the wall labels.
 * [ ] Updating the feet and inches textboxes should update the wall labels on the canvas.
     * [ ] The walls should adjust as soon as the user has stopped typing.
@@ -33,6 +27,12 @@ Each time you finish a task from the "backlog" section, move it to the "complete
 
 # COMPLETED
 
+* [x] Do a code cleanup:
+    * [x] Refactor any code that is messy or hard to read.
+        * [x] Extract logic into other files if necessary.
+    * [x] Remove any unused code or comments.
+    * [x] Ensure that the code follows best practices and is well-organized.
+    * [x] Remove console.logs.
 * [x] Add a favicon
 * [x] We only need feet/inches as a unit of measurement; get rid of meters
 * [x] Remove the concept of a border.
