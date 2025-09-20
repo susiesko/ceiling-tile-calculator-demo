@@ -1,13 +1,23 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useAppState } from './hooks/useAppState';
 import { ShapeConfig } from './components/shapes/ShapeConfig';
 import { CanvasRenderer } from './components/canvas/CanvasRenderer';
 import { TileControls } from './components/TileControls';
 import { CalculationResults } from './components/CalculationResults';
+import { AccordionSection } from './components/AccordionSection';
+import { WallLengthAdjustments } from './components/WallLengthAdjustments';
+import { TileOrientationControls } from './components/TileOrientationControls';
 import { validateShape } from './utils/validation';
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [openSections, setOpenSections] = useState({
+    step1: true,
+    step2: false,
+    step3: false,
+    step4: false
+  });
+
   const {
     state,
     updateShape,
@@ -18,6 +28,21 @@ function App() {
   } = useAppState();
 
   const validation = validateShape(state.shape, state.units);
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections(prev => {
+      const isCurrentlyOpen = prev[section];
+      // Close all sections first
+      const allClosed = {
+        step1: false,
+        step2: false,
+        step3: false,
+        step4: false
+      };
+      // If the clicked section was closed, open it; if it was open, leave all closed
+      return isCurrentlyOpen ? allClosed : { ...allClosed, [section]: true };
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -49,10 +74,15 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Panel - Controls */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Shape Configuration */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+          {/* Left Panel - Accordion Steps */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* Step 1: Choose room shape */}
+            <AccordionSection
+              title="Choose room shape"
+              stepNumber={1}
+              isOpen={openSections.step1}
+              onToggle={() => toggleSection('step1')}
+            >
               <ShapeConfig
                 shape={state.shape}
                 units={state.units}
@@ -80,10 +110,15 @@ function App() {
                   ))}
                 </div>
               )}
-            </div>
+            </AccordionSection>
 
-            {/* Tile Controls */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            {/* Step 2: Choose tile size */}
+            <AccordionSection
+              title="Choose tile size"
+              stepNumber={2}
+              isOpen={openSections.step2}
+              onToggle={() => toggleSection('step2')}
+            >
               <TileControls
                 tileConfig={state.tileConfig}
                 units={state.units}
@@ -91,10 +126,41 @@ function App() {
                 pricePerTile={state.pricePerTile}
                 onPriceChange={updatePricePerTile}
               />
-            </div>
+            </AccordionSection>
+
+            {/* Step 3: Choose tile orientation (if 2x4) */}
+            <AccordionSection
+              title="Choose tile orientation"
+              stepNumber={3}
+              isOpen={openSections.step3}
+              onToggle={() => toggleSection('step3')}
+              isDisabled={state.tileConfig.size !== '2x4'}
+            >
+              <TileOrientationControls
+                tileConfig={state.tileConfig}
+                onTileConfigChange={updateTileConfig}
+              />
+            </AccordionSection>
+
+            {/* Step 4: Adjust wall lengths */}
+            <AccordionSection
+              title="Adjust wall lengths"
+              stepNumber={4}
+              isOpen={openSections.step4}
+              onToggle={() => toggleSection('step4')}
+            >
+              <WallLengthAdjustments
+                shape={state.shape}
+                units={state.units}
+                onShapeChange={updateShape}
+              />
+              <div className="text-sm text-gray-600 mt-4">
+                You can also drag the wall labels on the canvas to adjust dimensions.
+              </div>
+            </AccordionSection>
 
             {/* Results */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mt-6">
               <CalculationResults
                 calculation={state.calculation}
                 units={state.units}

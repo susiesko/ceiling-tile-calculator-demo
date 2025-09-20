@@ -8,25 +8,25 @@ Only do one task at a time. A task includes the top level and it's child tasks (
 Each time you finish a task from the "backlog" section, move it to the "completed" section and mark it with an "x".
 
 # BACKLOG
-* [ ] The textboxes that update the wall labels.
+
 * [ ] Updating the feet and inches textboxes should update the wall labels on the canvas.
-    * [ ] The walls should adjust as soon as the user has stopped typing.
-* The tile grid should be lined up with the grid on the canvas.
-* [ ] Wall labels should be shown in a measurement of feet and inches. So 5.5 feet should display as 5'6"
-    * [ ] Inches portion of label should round to the nearest 10th place.
-    * [ ] If the measurement is a whole amount of feet, do not display the inches portion. (6'0" should just display as
-      6')
-* [ ] Put calculator in an accordion-esque layout where each step is in its own collapsable section. The according
-  should be to the left of the canvas.
-    * Step 1: Choose room shape.
-    * Step 2: Choose tile size.
-    * Step 3: If tile size is 2x4, choose tile orientation.
-    * Step 4: Adjust wall lengths.
-* [ ] Get rid of price input.
-* [ ] Get rid of area information.
+    * [ ] The walls should adjust as soon as the user has stopped typing for 1 sec.
+* [ ] The tile grid should be lined up with the grid on the canvas. The grid and tiles should be fixed to the canvas at
+  all times.
+* [ ] Some cleanup
+    * [ ] Get rid of price input.
+    * [ ] Get rid of area information.
+    * [ ] Get rid of scale text.
 
 # COMPLETED
 
+* [x] Put calculator in an accordion-esque layout where each step is in its own collapsable section. The accordion
+  should be to the left of the canvas. Only one step at a time can be active, and opening another step should close the
+  current step.
+    * [x] Step 1: Choose room shape.
+    * [x] Step 2: Choose tile size.
+    * [x] Step 3: If tile size is 2x4, choose tile orientation.
+    * [x] Step 4: Adjust wall lengths.
 * [x] Do a code cleanup:
     * [x] Refactor any code that is messy or hard to read.
         * [x] Extract logic into other files if necessary.
