@@ -1,34 +1,32 @@
-import React from 'react';
-import { Shape, Units, ShapeType } from '../../types';
-import { ShapeSelector } from './ShapeSelector';
-import { RectangleForm } from './RectangleForm';
-import { LShapeForm } from './LShapeForm';
+import {ShapeType} from '../../types';
+import {useAppStore} from '../../store/appStore';
+import {ShapeSelector} from './ShapeSelector';
 
 interface ShapeConfigProps {
-  shape: Shape;
-  units: Units;
-  onShapeChange: (shape: Shape) => void;
-  className?: string;
+    className?: string;
 }
 
 const defaultShapes = {
-  rectangle: { type: 'rectangle' as const, width: 12, height: 12 },
-  'l-shape': { type: 'l-shape' as const, width1: 6, height1: 6, width2: 6, height2: 6 }
+    rectangle: {type: 'rectangle' as const, width: 12, height: 12},
+    'l-shape': {type: 'l-shape' as const, width1: 6, height1: 6, width2: 6, height2: 6}
 };
 
-export function ShapeConfig({ shape, units, onShapeChange, className = '' }: ShapeConfigProps) {
-  const handleShapeTypeChange = (shapeType: ShapeType) => {
-    if (shape.type !== shapeType) {
-      onShapeChange(defaultShapes[shapeType]);
-    }
-  };
+export function ShapeConfig({className = ''}: ShapeConfigProps) {
+    const shape = useAppStore((state) => state.shape);
+    const updateShape = useAppStore((state) => state.updateShape);
 
-  return (
-    <div className={`space-y-6 ${className}`}>
-      <ShapeSelector
-        selectedShape={shape.type}
-        onShapeChange={handleShapeTypeChange}
-      />
-    </div>
-  );
+    const handleShapeTypeChange = (shapeType: ShapeType) => {
+        if (shape.type !== shapeType) {
+            updateShape(defaultShapes[shapeType]);
+        }
+    };
+
+    return (
+        <div className={`space-y-6 ${className}`}>
+            <ShapeSelector
+                selectedShape={shape.type}
+                onShapeChange={handleShapeTypeChange}
+            />
+        </div>
+    );
 }

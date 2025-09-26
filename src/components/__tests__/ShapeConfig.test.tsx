@@ -1,106 +1,74 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import {beforeEach, describe, expect, it, vi} from 'vitest'
+import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ShapeConfig } from '../shapes/ShapeConfig'
-import { RectangleShape, LShape } from '../../types'
+import {ShapeConfig} from '../shapes/ShapeConfig'
+import {RectangleShape} from '../../types'
+import {useAppStore} from '../../store/appStore'
+
+// Mock the store
+vi.mock('../../store/appStore')
 
 describe('ShapeConfig', () => {
-  const mockOnShapeChange = vi.fn()
+    const mockUpdateShape = vi.fn()
+    const mockUseAppStore = vi.mocked(useAppStore)
 
-  beforeEach(() => {
-    mockOnShapeChange.mockClear()
-  })
+    beforeEach(() => {
+        mockUpdateShape.mockClear()
 
-  describe('Shape selector', () => {
-    it('should render shape type buttons', () => {
-      const shape: RectangleShape = {
-        type: 'rectangle',
-        width: 10,
-        height: 8
-      }
-
-      render(
-        <ShapeConfig
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
-
-      expect(screen.getByText('Rectangle')).toBeInTheDocument()
-      expect(screen.getByText('L-Shape')).toBeInTheDocument()
+        // Setup default store mock
+        mockUseAppStore.mockImplementation((selector: any) => {
+            const state = {
+                shape: {type: 'rectangle', width: 10, height: 8} as RectangleShape,
+                updateShape: mockUpdateShape
+            }
+            return selector(state)
+        })
     })
 
-    it('should highlight selected shape type', () => {
-      const shape: RectangleShape = {
-        type: 'rectangle',
-        width: 10,
-        height: 8
-      }
+    describe('Shape selector', () => {
+        it('should render shape type buttons', () => {
+            render(<ShapeConfig/>)
 
-      render(
-        <ShapeConfig
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+            expect(screen.getByText('Rectangle')).toBeInTheDocument()
+            expect(screen.getByText('L-Shape')).toBeInTheDocument()
+        })
 
-      const rectangleButton = screen.getByText('Rectangle').closest('button')
-      expect(rectangleButton).toHaveClass('border-blue-500')
+        it('should highlight selected shape type', () => {
+            render(<ShapeConfig/>)
+
+            const rectangleButton = screen.getByText('Rectangle').closest('button')
+            expect(rectangleButton).toHaveClass('border-blue-500')
+        })
+
+        it('should switch shape types when clicked', async () => {
+            const user = userEvent.setup()
+
+            render(<ShapeConfig/>)
+
+            const lShapeButton = screen.getByText('L-Shape')
+            await user.click(lShapeButton)
+
+            expect(mockUpdateShape).toHaveBeenCalledWith({
+                type: 'l-shape',
+                width1: 6,
+                height1: 6,
+                width2: 6,
+                height2: 6
+            })
+        })
     })
 
-    it('should switch shape types when clicked', async () => {
-      const user = userEvent.setup()
-      const shape: RectangleShape = {
-        type: 'rectangle',
-        width: 10,
-        height: 8
-      }
+    describe('Default values', () => {
+        it('should not change shape if same type is selected', async () => {
+            const user = userEvent.setup()
 
-      render(
-        <ShapeConfig
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+            render(<ShapeConfig/>)
 
-      const lShapeButton = screen.getByText('L-Shape')
-      await user.click(lShapeButton)
+            const rectangleButton = screen.getByText('Rectangle')
+            await user.click(rectangleButton)
 
-      expect(mockOnShapeChange).toHaveBeenCalledWith({
-        type: 'l-shape',
-        width1: 6,
-        height1: 6,
-        width2: 6,
-        height2: 6
-      })
+            // Should not call updateShape if same type
+            expect(mockUpdateShape).not.toHaveBeenCalled()
+        })
     })
-  })
-
-  describe('Default values', () => {
-    it('should not change shape if same type is selected', async () => {
-      const user = userEvent.setup()
-      const shape: RectangleShape = {
-        type: 'rectangle',
-        width: 15, // Custom value
-        height: 12  // Custom value
-      }
-
-      render(
-        <ShapeConfig
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
-
-      const rectangleButton = screen.getByText('Rectangle')
-      await user.click(rectangleButton)
-
-      // Should not call onShapeChange if same type
-      expect(mockOnShapeChange).not.toHaveBeenCalled()
-    })
-  })
 })

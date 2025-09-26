@@ -1,14 +1,13 @@
-import {RectangleShape, Units} from '../../types';
+import {RectangleShape} from '../../types';
 import {useFeetInchesInput} from '../../hooks/useFeetInchesInput';
 
 interface RectangleFormProps {
     shape: RectangleShape;
-    units: Units;
     onChange: (shape: RectangleShape) => void;
     className?: string;
 }
 
-export function RectangleForm({shape, units, onChange, className = ''}: RectangleFormProps) {
+export function RectangleForm({shape, onChange, className = ''}: RectangleFormProps) {
     const width = useFeetInchesInput(shape.width, (value) => {
         onChange({...shape, width: value});
     });

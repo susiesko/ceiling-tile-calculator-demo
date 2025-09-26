@@ -1,93 +1,43 @@
-import { useState, useEffect } from 'react';
-import { AppState, Shape, TileConfig, GridConfig, CalculationResult, Units } from '../types';
-import { convertShapeToPolygon } from '../utils/geometry';
-import { calculateTiles } from '../utils/tileCalculation';
-
-const defaultAppState: AppState = {
-  units: 'feet',
-  shape: {
-    type: 'rectangle',
-    width: 12,
-    height: 12
-  },
-  tileConfig: {
-    size: '2x2',
-    orientation: 0
-  },
-  gridConfig: {
-    origin: 'top-left',
-    offsetX: 0,
-    offsetY: 0,
-    snapGrid: 0.5
-  },
-  calculation: {
-    totalTiles: 0,
-    fullTiles: 0,
-    partialTiles: 0,
-    estimatedTotal: 0,
-    area: 0,
-    tileArea: 0,
-    wasteFactor: 0
-  }
-};
+import {useEffect} from 'react';
+import {useAppStore} from '../store/appStore';
+import {convertShapeToPolygon} from '../utils/geometry';
+import {calculateTiles} from '../utils/tileCalculation';
 
 export function useAppState() {
-  const [state, setState] = useState<AppState>(defaultAppState);
+    const store = useAppStore();
 
-  // Recalculate tiles whenever relevant state changes
-  useEffect(() => {
-    const roomVertices = convertShapeToPolygon(state.shape);
-    if (roomVertices.length > 0) {
-      const calculation = calculateTiles(
-        roomVertices,
-        [],
-        state.tileConfig,
-        state.gridConfig
-      );
+    // Recalculate tiles whenever relevant state changes
+    useEffect(() => {
+        const roomVertices = convertShapeToPolygon(store.shape);
+        if (roomVertices.length > 0) {
+            const calculation = calculateTiles(
+                roomVertices,
+                store.tileConfig,
+                store.gridConfig
+            );
 
-      if (state.pricePerTile) {
-        calculation.costEstimate = calculation.estimatedTotal * state.pricePerTile;
-      }
+            if (store.pricePerTile) {
+                calculation.costEstimate = calculation.estimatedTotal * store.pricePerTile;
+            }
 
-      setState(prev => ({ ...prev, calculation }));
-    }
-  }, [state.shape, state.tileConfig, state.gridConfig, state.pricePerTile]);
+            // Update the store with new calculation
+            useAppStore.setState({calculation});
+        }
+    }, [store.shape, store.tileConfig, store.gridConfig, store.pricePerTile]);
 
-
-
-  const updateShape = (shape: Shape) => {
-    setState(prev => ({ ...prev, shape }));
-  };
-
-  const updateTileConfig = (tileConfig: Partial<TileConfig>) => {
-    setState(prev => ({
-      ...prev,
-      tileConfig: { ...prev.tileConfig, ...tileConfig }
-    }));
-  };
-
-  const updateGridConfig = (gridConfig: Partial<GridConfig>) => {
-    setState(prev => ({
-      ...prev,
-      gridConfig: { ...prev.gridConfig, ...gridConfig }
-    }));
-  };
-
-
-  const updatePricePerTile = (price?: number) => {
-    setState(prev => ({ ...prev, pricePerTile: price }));
-  };
-
-  const resetState = () => {
-    setState(defaultAppState);
-  };
-
-  return {
-    state,
-    updateShape,
-    updateTileConfig,
-    updateGridConfig,
-    updatePricePerTile,
-    resetState
-  };
+    return {
+        state: {
+            units: store.units,
+            shape: store.shape,
+            tileConfig: store.tileConfig,
+            gridConfig: store.gridConfig,
+            calculation: store.calculation,
+            pricePerTile: store.pricePerTile
+        },
+        updateShape: store.updateShape,
+        updateTileConfig: store.updateTileConfig,
+        updateGridConfig: store.updateGridConfig,
+        updatePricePerTile: store.updatePricePerTile,
+        resetState: store.resetState
+    };
 }

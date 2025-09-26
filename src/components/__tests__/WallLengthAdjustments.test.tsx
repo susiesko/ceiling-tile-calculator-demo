@@ -1,14 +1,19 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { WallLengthAdjustments } from '../WallLengthAdjustments'
 import { RectangleShape, LShape } from '../../types'
+import { useAppStore } from '../../store/appStore'
+
+// Mock the store
+vi.mock('../../store/appStore')
 
 describe('WallLengthAdjustments', () => {
-  const mockOnShapeChange = vi.fn()
+  const mockUpdateShape = vi.fn()
+  const mockUseAppStore = vi.mocked(useAppStore)
 
   beforeEach(() => {
-    mockOnShapeChange.mockClear()
+    mockUpdateShape.mockClear()
   })
 
   describe('Rectangle form', () => {
@@ -19,13 +24,17 @@ describe('WallLengthAdjustments', () => {
         height: 8
       }
 
-      render(
-        <WallLengthAdjustments
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+      // Setup store mock for this test
+      mockUseAppStore.mockImplementation((selector: any) => {
+        const state = {
+          shape,
+          units: 'feet' as const,
+          updateShape: mockUpdateShape
+        }
+        return selector(state)
+      })
+
+      render(<WallLengthAdjustments />)
 
       expect(screen.getByDisplayValue('10')).toBeInTheDocument()
       expect(screen.getByDisplayValue('8')).toBeInTheDocument()
@@ -38,13 +47,16 @@ describe('WallLengthAdjustments', () => {
         height: 8
       }
 
-      render(
-        <WallLengthAdjustments
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+      mockUseAppStore.mockImplementation((selector: any) => {
+        const state = {
+          shape,
+          units: 'feet' as const,
+          updateShape: mockUpdateShape
+        }
+        return selector(state)
+      })
+
+      render(<WallLengthAdjustments />)
 
       expect(screen.getByText('Width (Walls A & C)')).toBeInTheDocument()
       expect(screen.getByText('Height (Walls B & D)')).toBeInTheDocument()
@@ -60,13 +72,16 @@ describe('WallLengthAdjustments', () => {
         height: 8
       }
 
-      render(
-        <WallLengthAdjustments
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+      mockUseAppStore.mockImplementation((selector: any) => {
+        const state = {
+          shape,
+          units: 'feet' as const,
+          updateShape: mockUpdateShape
+        }
+        return selector(state)
+      })
+
+      render(<WallLengthAdjustments />)
 
       // Find the width feet input (first input with value '10')
       const widthFeetInputs = screen.getAllByDisplayValue('10')
@@ -77,9 +92,9 @@ describe('WallLengthAdjustments', () => {
       // Trigger the onBlur event to save the change
       fireEvent.blur(widthFeetInput)
 
-      // Check that onShapeChange was called
-      expect(mockOnShapeChange).toHaveBeenCalled()
-      const lastCall = mockOnShapeChange.mock.calls[mockOnShapeChange.mock.calls.length - 1][0]
+      // Check that updateShape was called
+      expect(mockUpdateShape).toHaveBeenCalled()
+      const lastCall = mockUpdateShape.mock.calls[mockUpdateShape.mock.calls.length - 1][0]
       expect(lastCall.type).toBe('rectangle')
       expect(lastCall.width).toBe(12)
       expect(lastCall.height).toBe(8)
@@ -96,13 +111,16 @@ describe('WallLengthAdjustments', () => {
         height2: 3
       }
 
-      render(
-        <WallLengthAdjustments
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+      mockUseAppStore.mockImplementation((selector: any) => {
+        const state = {
+          shape,
+          units: 'feet' as const,
+          updateShape: mockUpdateShape
+        }
+        return selector(state)
+      })
+
+      render(<WallLengthAdjustments />)
 
       expect(screen.getByDisplayValue('10')).toBeInTheDocument()
       expect(screen.getByDisplayValue('6')).toBeInTheDocument()
@@ -119,13 +137,16 @@ describe('WallLengthAdjustments', () => {
         height2: 3
       }
 
-      render(
-        <WallLengthAdjustments
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+      mockUseAppStore.mockImplementation((selector: any) => {
+        const state = {
+          shape,
+          units: 'feet' as const,
+          updateShape: mockUpdateShape
+        }
+        return selector(state)
+      })
+
+      render(<WallLengthAdjustments />)
 
       expect(screen.getByText('Wall A')).toBeInTheDocument()
       expect(screen.getByText('Wall B')).toBeInTheDocument()
@@ -145,13 +166,16 @@ describe('WallLengthAdjustments', () => {
         height2: 3
       }
 
-      render(
-        <WallLengthAdjustments
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+      mockUseAppStore.mockImplementation((selector: any) => {
+        const state = {
+          shape,
+          units: 'feet' as const,
+          updateShape: mockUpdateShape
+        }
+        return selector(state)
+      })
+
+      render(<WallLengthAdjustments />)
 
       // Find the width1 feet input (first input with value '10')
       const width1FeetInputs = screen.getAllByDisplayValue('10')
@@ -163,8 +187,8 @@ describe('WallLengthAdjustments', () => {
       fireEvent.blur(width1FeetInput)
 
       // Check that onShapeChange was called
-      expect(mockOnShapeChange).toHaveBeenCalled()
-      const lastCall = mockOnShapeChange.mock.calls[mockOnShapeChange.mock.calls.length - 1][0]
+      expect(mockUpdateShape).toHaveBeenCalled()
+      const lastCall = mockUpdateShape.mock.calls[mockUpdateShape.mock.calls.length - 1][0]
       expect(lastCall.type).toBe('l-shape')
       expect(lastCall.width1).toBe(12)
       expect(lastCall.height1).toBe(6)
@@ -182,13 +206,16 @@ describe('WallLengthAdjustments', () => {
         height: 8
       }
 
-      render(
-        <WallLengthAdjustments
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+      mockUseAppStore.mockImplementation((selector: any) => {
+        const state = {
+          shape,
+          units: 'feet' as const,
+          updateShape: mockUpdateShape
+        }
+        return selector(state)
+      })
+
+      render(<WallLengthAdjustments />)
 
       // Find the width feet input (first input with value '10')
       const widthFeetInputs = screen.getAllByDisplayValue('10')
@@ -199,7 +226,7 @@ describe('WallLengthAdjustments', () => {
       fireEvent.blur(widthFeetInput)
 
       // Should call with 0 when empty
-      expect(mockOnShapeChange).toHaveBeenCalledWith({
+      expect(mockUpdateShape).toHaveBeenCalledWith({
         type: 'rectangle',
         width: 0,
         height: 8
@@ -214,13 +241,16 @@ describe('WallLengthAdjustments', () => {
         height: 8
       }
 
-      render(
-        <WallLengthAdjustments
-          shape={shape}
-          units="feet"
-          onShapeChange={mockOnShapeChange}
-        />
-      )
+      mockUseAppStore.mockImplementation((selector: any) => {
+        const state = {
+          shape,
+          units: 'feet' as const,
+          updateShape: mockUpdateShape
+        }
+        return selector(state)
+      })
+
+      render(<WallLengthAdjustments />)
 
       // Find all inches inputs and get the first one (width inches)
       const widthInchesInputs = screen.getAllByDisplayValue('0')
@@ -232,7 +262,7 @@ describe('WallLengthAdjustments', () => {
       fireEvent.blur(widthInchesInput)
 
       // Should convert 10 feet + 6 inches = 10.5 feet
-      expect(mockOnShapeChange).toHaveBeenCalledWith({
+      expect(mockUpdateShape).toHaveBeenCalledWith({
         type: 'rectangle',
         width: 10.5,
         height: 8

@@ -24,7 +24,7 @@ describe('calculateTiles', () => {
         { x: 0, y: 8 }
       ]
 
-      const result = calculateTiles(roomVertices, [], defaultTileConfig, defaultGridConfig)
+      const result = calculateTiles(roomVertices, defaultTileConfig, defaultGridConfig)
 
       expect(result.area).toBe(80)
       expect(result.tileArea).toBe(4) // 2x2 = 4
@@ -45,7 +45,7 @@ describe('calculateTiles', () => {
         size: '2x4'
       }
 
-      const result = calculateTiles(roomVertices, [], tileConfig, defaultGridConfig)
+      const result = calculateTiles(roomVertices, tileConfig, defaultGridConfig)
 
       expect(result.area).toBe(96)
       expect(result.tileArea).toBe(8) // 2x4 = 8
@@ -66,7 +66,7 @@ describe('calculateTiles', () => {
         orientation: 90 // 4x2 when rotated
       }
 
-      const result = calculateTiles(roomVertices, [], tileConfig, defaultGridConfig)
+      const result = calculateTiles(roomVertices, tileConfig, defaultGridConfig)
 
       expect(result.area).toBe(96)
       expect(result.tileArea).toBe(8) // Still 8 sq ft
@@ -82,7 +82,7 @@ describe('calculateTiles', () => {
         { x: 0, y: 7 }
       ]
 
-      const result = calculateTiles(roomVertices, [], defaultTileConfig, defaultGridConfig)
+      const result = calculateTiles(roomVertices, defaultTileConfig, defaultGridConfig)
 
       expect(result.area).toBe(63)
       expect(result.fullTiles).toBeLessThan(result.estimatedTotal)
@@ -103,7 +103,7 @@ describe('calculateTiles', () => {
         { x: 0, y: 9 }
       ]
 
-      const result = calculateTiles(lShapeVertices, [], defaultTileConfig, defaultGridConfig)
+      const result = calculateTiles(lShapeVertices, defaultTileConfig, defaultGridConfig)
 
       expect(result.area).toBe(102)
       expect(result.estimatedTotal).toBeGreaterThan(0)
@@ -122,7 +122,7 @@ describe('calculateTiles', () => {
         { x: 0, y: 1 }
       ]
 
-      const result = calculateTiles(smallRoom, [], defaultTileConfig, defaultGridConfig)
+      const result = calculateTiles(smallRoom, defaultTileConfig, defaultGridConfig)
 
       expect(result.area).toBe(1)
       expect(result.estimatedTotal).toBeGreaterThan(0)
@@ -132,7 +132,7 @@ describe('calculateTiles', () => {
     it('should handle empty room gracefully', () => {
       const emptyRoom: { x: number; y: number }[] = []
 
-      const result = calculateTiles(emptyRoom, [], defaultTileConfig, defaultGridConfig)
+      const result = calculateTiles(emptyRoom, defaultTileConfig, defaultGridConfig)
 
       expect(result.area).toBe(0)
       expect(result.totalTiles).toBe(0)
@@ -147,7 +147,7 @@ describe('calculateTiles', () => {
         { x: 0, y: 15 }
       ]
 
-      const result = calculateTiles(roomVertices, [], defaultTileConfig, defaultGridConfig)
+      const result = calculateTiles(roomVertices, defaultTileConfig, defaultGridConfig)
 
       // Sanity checks
       expect(result.area).toBe(300)

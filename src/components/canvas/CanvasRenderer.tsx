@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {Point, Shape, TileConfig, Units} from '../../types';
+import {Point} from '../../types';
+import {useAppStore} from '../../store/appStore';
 import {convertShapeToPolygon} from '../../utils/geometry';
 import {
     calculateWallLabels,
@@ -16,23 +17,18 @@ import {
 import {findWallLabelAt, moveWall} from '../../utils/wallManipulation';
 
 interface CanvasRendererProps {
-    shape: Shape;
-    tileConfig: TileConfig;
-    units: Units;
-    onShapeChange: (shape: Shape) => void;
     canvasRef?: React.RefObject<HTMLCanvasElement>;
     className?: string;
 }
 
-
 export function CanvasRenderer({
-                                   shape,
-                                   tileConfig,
-                                   units,
-                                   onShapeChange,
                                    canvasRef: externalCanvasRef,
                                    className = ''
                                }: CanvasRendererProps) {
+    const shape = useAppStore((state) => state.shape);
+    const tileConfig = useAppStore((state) => state.tileConfig);
+    const units = useAppStore((state) => state.units);
+    const updateShape = useAppStore((state) => state.updateShape);
     const internalCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = externalCanvasRef || internalCanvasRef;
     const [pan, setPan] = useState({x: 0, y: 0});
@@ -140,7 +136,7 @@ export function CanvasRenderer({
 
             const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
             if (clickedWall !== -1) {
-                moveWall(clickedWall, deltaX, deltaY, shape, onShapeChange);
+                moveWall(clickedWall, deltaX, deltaY, shape, updateShape);
             }
             setDragStart(currentWorldPos);
         }
