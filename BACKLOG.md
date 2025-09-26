@@ -10,8 +10,14 @@ an "x".
 
 # BACKLOG
 
-* [ ] ENHANCEMENT: Update the L shaped room SVG on the button in Step 1 to be a bit bigger and look cleaner. It should
-  also be oriented to look like an L rather than be upside down.
+* [ ] Walls should each be stored as an object with properties instead of just an array of numbers.
+    * [ ] Each wall should have a name (A, B, C, etc.), length in inches, and orientation (horizontal or vertical).
+    * [ ] The walls should be labeled alphabetically, starting with A in the top left corner and going clockwise.
+    * [ ] The wall objects should be stored in an array in the global state.
+* [ ] ENHANCEMENT: Add a tile picker step.
+    * [ ] Available tiles should be stored in a JSON file.
+    * [ ] Each tile should have a name, dimensions (width and height in inches),
+    * [ ] and an image URL, which points to the images in public/tiles.
 
 # COMPLETED
 
@@ -62,3 +68,5 @@ an "x".
     * [x] Get rid of price input.
     * [x] Get rid of area information.
     * [x] Get rid of scale text.
+* [x] ENHANCEMENT: The L shaped room SVG on the button in Step 1 to be a bit bigger and look cleaner. It should
+  also be oriented to look like an L rather than be upside down.

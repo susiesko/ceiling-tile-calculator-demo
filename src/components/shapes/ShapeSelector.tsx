@@ -7,8 +7,30 @@ interface ShapeSelectorProps {
 }
 
 const shapeOptions = [
-    {type: 'rectangle' as const, label: 'Rectangle', icon: '▢'},
-    {type: 'l-shape' as const, label: 'L-Shape', icon: '⌐'}
+    {
+        type: 'rectangle' as const,
+        label: 'Rectangle',
+        icon: (
+            <svg width="48" height="36" viewBox="0 0 48 36" fill="currentColor" className="mx-auto">
+                <rect x="4" y="4" width="40" height="28" fill="none" stroke="currentColor" strokeWidth="2" rx="2"/>
+            </svg>
+        )
+    },
+    {
+        type: 'l-shape' as const,
+        label: 'L-Shape',
+        icon: (
+            <svg width="48" height="36" viewBox="0 0 48 36" fill="currentColor" className="mx-auto">
+                <path
+                    d="M8 4 L28 4 L28 16 L40 16 L40 32 L8 32 Z"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinejoin="round"
+                />
+            </svg>
+        )
+    }
 ];
 
 export function ShapeSelector({selectedShape, onShapeChange, className = ''}: ShapeSelectorProps) {
@@ -36,7 +58,7 @@ export function ShapeSelector({selectedShape, onShapeChange, className = ''}: Sh
                                 </svg>
                             </div>
                         )}
-                        <div className="text-3xl mb-2">{option.icon}</div>
+                        <div className="mb-2">{option.icon}</div>
                         <div className="text-sm font-semibold">{option.label}</div>
                     </button>
                 ))}
