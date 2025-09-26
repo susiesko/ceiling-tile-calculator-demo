@@ -13,37 +13,37 @@ export interface WallLabel {
   letter: string;
 }
 
-export function drawGrid(ctx: CanvasRenderingContext2D, tileConfig: TileConfig) {
+export function drawGrid(
+  ctx: CanvasRenderingContext2D,
+  tileConfig: TileConfig
+) {
   ctx.strokeStyle = '#f3f4f6';
   ctx.lineWidth = 1;
 
-  const baseTileSize = PIXELS_PER_FOOT;
-  let xSpacing = baseTileSize;
-  let ySpacing = baseTileSize;
+  // Calculate tile size in pixels - fixed to canvas
+  let tileWidthPixels = 2 * PIXELS_PER_FOOT;  // default 2x2
+  let tileHeightPixels = 2 * PIXELS_PER_FOOT;
 
   if (tileConfig.size === '2x4') {
     if (tileConfig.orientation === TileOrientation.Horizontal) {
-      xSpacing = baseTileSize * 4;
-      ySpacing = baseTileSize * 2;
+      tileWidthPixels = 4 * PIXELS_PER_FOOT;
+      tileHeightPixels = 2 * PIXELS_PER_FOOT;
     } else {
-      xSpacing = baseTileSize * 2;
-      ySpacing = baseTileSize * 4;
+      tileWidthPixels = 2 * PIXELS_PER_FOOT;
+      tileHeightPixels = 4 * PIXELS_PER_FOOT;
     }
-  } else {
-    xSpacing = baseTileSize * 2;
-    ySpacing = baseTileSize * 2;
   }
 
-  // Draw vertical lines
-  for (let x = 0; x <= CANVAS_WIDTH; x += xSpacing) {
+  // Draw vertical lines across entire canvas
+  for (let x = 0; x <= CANVAS_WIDTH; x += tileWidthPixels) {
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, CANVAS_HEIGHT);
     ctx.stroke();
   }
 
-  // Draw horizontal lines
-  for (let y = 0; y <= CANVAS_HEIGHT; y += ySpacing) {
+  // Draw horizontal lines across entire canvas
+  for (let y = 0; y <= CANVAS_HEIGHT; y += tileHeightPixels) {
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(CANVAS_WIDTH, y);
@@ -63,24 +63,38 @@ export function drawTiles(
   ctx.strokeStyle = '#e5e7eb';
   ctx.lineWidth = 1;
 
-  const tileSize = tileConfig.size === '2x2' ? 2 : (tileConfig.orientation === TileOrientation.Horizontal ? {
-    w: 4,
-    h: 2
-  } : { w: 2, h: 4 });
+  // Calculate tile size in pixels - same as fixed grid
+  let tileWidthPixels = 2 * PIXELS_PER_FOOT;  // default 2x2
+  let tileHeightPixels = 2 * PIXELS_PER_FOOT;
 
-  const tileSizePixels = {
-    width: (typeof tileSize === 'number' ? tileSize : tileSize.w) * PIXELS_PER_FOOT,
-    height: (typeof tileSize === 'number' ? tileSize : tileSize.h) * PIXELS_PER_FOOT
-  };
+  if (tileConfig.size === '2x4') {
+    if (tileConfig.orientation === TileOrientation.Horizontal) {
+      tileWidthPixels = 4 * PIXELS_PER_FOOT;
+      tileHeightPixels = 2 * PIXELS_PER_FOOT;
+    } else {
+      tileWidthPixels = 2 * PIXELS_PER_FOOT;
+      tileHeightPixels = 4 * PIXELS_PER_FOOT;
+    }
+  }
 
+  // Get room bounds in screen coordinates
   const bounds = getRoomBounds(vertices);
-  const topLeft = worldToScreen({ x: bounds.minX, y: bounds.minY });
-  const bottomRight = worldToScreen({ x: bounds.maxX, y: bounds.maxY });
+  const topLeftScreen = worldToScreen({ x: bounds.minX, y: bounds.minY });
+  const bottomRightScreen = worldToScreen({ x: bounds.maxX, y: bounds.maxY });
 
-  // Draw tile grid within room bounds
-  for (let x = topLeft.x; x < bottomRight.x; x += tileSizePixels.width) {
-    for (let y = topLeft.y; y < bottomRight.y; y += tileSizePixels.height) {
-      ctx.strokeRect(x, y, tileSizePixels.width, tileSizePixels.height);
+  // Find the range of canvas grid cells that intersect with the room
+  const startGridX = Math.floor(topLeftScreen.x / tileWidthPixels) * tileWidthPixels;
+  const startGridY = Math.floor(topLeftScreen.y / tileHeightPixels) * tileHeightPixels;
+  const endGridX = Math.ceil(bottomRightScreen.x / tileWidthPixels) * tileWidthPixels;
+  const endGridY = Math.ceil(bottomRightScreen.y / tileHeightPixels) * tileHeightPixels;
+
+  // Draw tiles aligned with the fixed canvas grid
+  for (let x = startGridX; x < endGridX; x += tileWidthPixels) {
+    for (let y = startGridY; y < endGridY; y += tileHeightPixels) {
+      // Only draw tiles that are within canvas bounds
+      if (x >= 0 && y >= 0 && x < CANVAS_WIDTH && y < CANVAS_HEIGHT) {
+        ctx.strokeRect(x, y, tileWidthPixels, tileHeightPixels);
+      }
     }
   }
 }

@@ -47,12 +47,9 @@ export function useFeetInchesInput(
 
 
     const handleChange = useCallback(() => {
-        console.log('HANDLE CHANGE RUNNING');
         // Round the inches value to nearest half
         const inchesValue = parseFloat(inches) || 0;
         const roundedInches = roundToNearestHalf(inchesValue);
-
-        console.log('HANDLE CHANGE: inchesValue:', inchesValue, '→ rounded:', roundedInches);
 
         // Update display with rounded value
         const displayInches = roundedInches % 1 === 0 ? roundedInches.toString() : roundedInches.toFixed(1);
@@ -98,14 +95,12 @@ export function useFeetInchesInput(
     }, [feet, inches, onValueChange]);
 
     const setFeetWithDebounce = useCallback((value: string) => {
-        console.log('setFeetWithDebounce called with', value);
         isUserTyping.current = true;
         setFeet(value);
         debouncedUpdate();
     }, [debouncedUpdate]);
 
     const setInchesWithDebounce = useCallback((value: string) => {
-        console.log('setInchesWithDebounce called with', value);
         isUserTyping.current = true;
         setInches(value);
         debouncedUpdate();

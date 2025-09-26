@@ -10,8 +10,6 @@ an "x".
 
 # BACKLOG
 
-* [ ] The tile grid should be lined up with the grid on the canvas. The grid and tiles should be fixed to the canvas at
-  all times.
 * [ ] Some cleanup
     * [ ] Get rid of price input.
     * [ ] Get rid of area information.
@@ -62,3 +60,5 @@ an "x".
 * [x] Updating the feet and inches textboxes should update the wall labels on the canvas.
     * [x] The walls should adjust as soon as the user has stopped typing for 1 sec.
 * [x] BUG: The textboxes for the E and F walls of the L shaped room are missing.
+* [x] The tile grid should be lined up with the grid on the canvas. The grid and tiles should be fixed to the canvas at
+  all times.

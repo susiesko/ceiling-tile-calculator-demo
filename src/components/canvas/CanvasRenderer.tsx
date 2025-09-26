@@ -53,7 +53,7 @@ export function CanvasRenderer({
     }, [pan]);
 
 
-    const render = useCallback(() => {
+    const renderCanvas = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -63,16 +63,17 @@ export function CanvasRenderer({
         // Clear canvas
         ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        // Draw grid FIRST, without any transformations
+        // Draw grid fixed to canvas coordinates
         drawGrid(ctx, tileConfig);
 
+        console.log('tileConfig', tileConfig)
         // Now apply transformations for the room content
         ctx.save();
 
         // Draw room shape
         const vertices = convertShapeToPolygon(shape);
         if (vertices.length > 0) {
-            // Draw tiles
+            // Draw tiles aligned with fixed grid
             drawTiles(ctx, vertices, tileConfig, worldToScreen, getRoomBounds);
 
             drawRoomShape(ctx, vertices, worldToScreen);
@@ -165,8 +166,8 @@ export function CanvasRenderer({
     }, [shape]);
 
     useEffect(() => {
-        render();
-    }, [render]);
+        renderCanvas();
+    }, [renderCanvas]);
 
     return (
         <div className={`space-y-4 ${className}`}>

@@ -16,9 +16,6 @@ export function RectangleForm({shape, onChange, className = ''}: RectangleFormPr
         onChange({...shape, height: value});
     });
 
-    console.log('RENDERING RECTANGLE FORM: shape.width:', shape.width, 'shape.height:', shape.height);
-    console.log('width/height: width:', width.feet, 'width:', width.inches);
-
     return (
         <div className={`space-y-6 ${className}`}>
             <h4 className="text-lg font-semibold text-neutral-700">Rectangle Dimensions</h4>

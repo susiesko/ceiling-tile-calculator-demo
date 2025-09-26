@@ -8,7 +8,6 @@ export function formatFeetInches(totalFeet: number): string {
     const feet = Math.floor(totalFeet);
     const exactInches = new Decimal(totalFeet).minus(feet).times(12).toNumber();
     const inches = roundToNearestHalf(exactInches);
-    console.log('Wall label: totalFeet:', totalFeet, '→ exactInches:', exactInches, '→ rounded:', inches);
 
     if (inches >= 12) {
         return `${feet + Math.floor(inches / 12)}'`;
