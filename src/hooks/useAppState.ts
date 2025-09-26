@@ -16,14 +16,11 @@ export function useAppState() {
                 store.gridConfig
             );
 
-            if (store.pricePerTile) {
-                calculation.costEstimate = calculation.estimatedTotal * store.pricePerTile;
-            }
 
             // Update the store with new calculation
             useAppStore.setState({calculation});
         }
-    }, [store.shape, store.tileConfig, store.gridConfig, store.pricePerTile]);
+    }, [store.shape, store.tileConfig, store.gridConfig]);
 
     return {
         state: {
@@ -31,13 +28,11 @@ export function useAppState() {
             shape: store.shape,
             tileConfig: store.tileConfig,
             gridConfig: store.gridConfig,
-            calculation: store.calculation,
-            pricePerTile: store.pricePerTile
+            calculation: store.calculation
         },
         updateShape: store.updateShape,
         updateTileConfig: store.updateTileConfig,
         updateGridConfig: store.updateGridConfig,
-        updatePricePerTile: store.updatePricePerTile,
         resetState: store.resetState
     };
 }

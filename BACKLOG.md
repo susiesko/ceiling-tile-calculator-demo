@@ -10,10 +10,6 @@ an "x".
 
 # BACKLOG
 
-* [ ] Some cleanup
-    * [ ] Get rid of price input.
-    * [ ] Get rid of area information.
-    * [ ] Get rid of scale text.
 * [ ] ENHANCEMENT: Update the L shaped room SVG on the button in Step 1 to be a bit bigger and look cleaner. It should
   also be oriented to look like an L rather than be upside down.
 
@@ -62,3 +58,7 @@ an "x".
 * [x] BUG: The textboxes for the E and F walls of the L shaped room are missing.
 * [x] The tile grid should be lined up with the grid on the canvas. The grid and tiles should be fixed to the canvas at
   all times.
+* [x] Some cleanup
+    * [x] Get rid of price input.
+    * [x] Get rid of area information.
+    * [x] Get rid of scale text.

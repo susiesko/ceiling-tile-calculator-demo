@@ -171,13 +171,6 @@ export function CanvasRenderer({
 
     return (
         <div className={`space-y-4 ${className}`}>
-            <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">
-            Scale: 1 ft = {PIXELS_PER_FOOT} pixels
-          </span>
-                </div>
-            </div>
 
             <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
                 <canvas

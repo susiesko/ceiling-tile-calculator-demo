@@ -34,7 +34,6 @@ interface AppStore extends AppState {
     updateShape: (shape: Shape) => void;
     updateTileConfig: (tileConfig: Partial<TileConfig>) => void;
     updateGridConfig: (gridConfig: Partial<GridConfig>) => void;
-    updatePricePerTile: (price?: number) => void;
     resetState: () => void;
 }
 
@@ -61,10 +60,6 @@ export const useAppStore = create<AppStore>()(
                 }));
             },
 
-            updatePricePerTile: (price?: number) => {
-                set({pricePerTile: price});
-            },
-
             resetState: () => {
                 set(defaultAppState);
             }
@@ -77,7 +72,6 @@ export const useAppStore = create<AppStore>()(
                 shape: state.shape,
                 tileConfig: state.tileConfig,
                 gridConfig: state.gridConfig,
-                pricePerTile: state.pricePerTile,
                 // Don't persist calculation as it's derived and will be recalculated
             })
         }

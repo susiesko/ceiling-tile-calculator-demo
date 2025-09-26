@@ -34,8 +34,7 @@ export function calculateTiles(
         estimatedTotal,
         area: roomArea,
         tileArea,
-        wasteFactor: calculateWasteFactor(estimatedTotal * tileArea, roomArea),
-        costEstimate: undefined
+        wasteFactor: calculateWasteFactor(estimatedTotal * tileArea, roomArea)
     };
 }
 

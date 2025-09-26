@@ -56,7 +56,6 @@ export interface CalculationResult {
   area: number;
   tileArea: number;
   wasteFactor: number;
-  costEstimate?: number;
 }
 
 export interface AppState {
@@ -65,6 +64,5 @@ export interface AppState {
   tileConfig: TileConfig;
   gridConfig: GridConfig;
   calculation: CalculationResult;
-  pricePerTile?: number;
 }
 

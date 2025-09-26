@@ -8,9 +8,7 @@ interface TileControlsProps {
 
 export function TileControls({className = ''}: TileControlsProps) {
     const tileConfig = useAppStore((state) => state.tileConfig);
-    const pricePerTile = useAppStore((state) => state.pricePerTile);
     const updateTileConfig = useAppStore((state) => state.updateTileConfig);
-    const updatePricePerTile = useAppStore((state) => state.updatePricePerTile);
 
     return (
         <div className={`space-y-8 ${className}`}>
@@ -60,30 +58,6 @@ export function TileControls({className = ''}: TileControlsProps) {
                     Tile orientation can be adjusted in Step 3.
                 </div>
             )}
-
-            {/* Price per Tile */}
-            <div className="space-y-3">
-                <label className="block text-sm font-semibold text-neutral-700">
-                    Price per Tile (optional)
-                </label>
-                <div className="relative">
-                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-500 font-medium">
-                        $
-                    </div>
-                    <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={pricePerTile || ''}
-                        onChange={(e) => updatePricePerTile(parseFloat(e.target.value) || undefined)}
-                        className="w-full pl-8 pr-4 py-3 border-2 border-neutral-200 rounded-xl focus:outline-none focus:border-primary-500 focus:ring-4 focus:ring-primary-100 transition-all duration-200 bg-white hover:border-neutral-300"
-                        placeholder="0.00"
-                    />
-                </div>
-                <p className="text-xs text-neutral-500">
-                    Enter the cost per tile for budget estimation
-                </p>
-            </div>
         </div>
     );
 }
