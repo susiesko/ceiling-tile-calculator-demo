@@ -10,12 +10,15 @@ interface RectangleFormProps {
 
 export function RectangleForm({shape, units, onChange, className = ''}: RectangleFormProps) {
     const width = useFeetInchesInput(shape.width, (value) => {
-        onChange({ ...shape, width: value });
+        onChange({...shape, width: value});
     });
 
     const height = useFeetInchesInput(shape.height, (value) => {
-        onChange({ ...shape, height: value });
+        onChange({...shape, height: value});
     });
+
+    console.log('RENDERING RECTANGLE FORM: shape.width:', shape.width, 'shape.height:', shape.height);
+    console.log('width/height: width:', width.feet, 'width:', width.inches);
 
     return (
         <div className={`space-y-6 ${className}`}>
@@ -43,7 +46,7 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 type="number"
                                 min="0"
                                 max="11.9"
-                                step="0.1"
+                                step="0.5"
                                 value={width.inches}
                                 onChange={(e) => width.setInches(e.target.value)}
                                 onBlur={width.handleChange}
@@ -75,7 +78,7 @@ export function RectangleForm({shape, units, onChange, className = ''}: Rectangl
                                 type="number"
                                 min="0"
                                 max="11.9"
-                                step="0.1"
+                                step="0.5"
                                 value={height.inches}
                                 onChange={(e) => height.setInches(e.target.value)}
                                 onBlur={height.handleChange}

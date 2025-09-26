@@ -13,6 +13,7 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "decimal.js": "^10.6.0",
     "martinez-polygon-clipping": "^0.7.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"

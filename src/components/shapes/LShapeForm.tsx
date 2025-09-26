@@ -26,6 +26,19 @@ export function LShapeForm({ shape, units, onChange, className = '' }: LShapeFor
     onChange({ ...shape, height2: value });
   });
 
+  // Wall E controls the total width (width1 + width2)
+  const wallE = useFeetInchesInput(shape.width1 + shape.width2, (value) => {
+    // When Wall E (total width) changes, adjust width2 to maintain width1
+    const newWidth2 = Math.max(0.5, value - shape.width1);
+    onChange({ ...shape, width2: newWidth2 });
+  });
+
+  // Wall F controls the total height (height1 + height2)
+  const wallF = useFeetInchesInput(shape.height1 + shape.height2, (value) => {
+    // When Wall F (total height) changes, adjust height2 to maintain height1
+    const newHeight2 = Math.max(0.5, value - shape.height1);
+    onChange({ ...shape, height2: newHeight2 });
+  });
 
   return (
     <div className={`space-y-4 ${className}`}>
@@ -54,7 +67,7 @@ export function LShapeForm({ shape, units, onChange, className = '' }: LShapeFor
                 type="number"
                 min="0"
                 max="11.9"
-                step="0.1"
+                step="0.5"
                 value={width1.inches}
                 onChange={(e) => width1.setInches(e.target.value)}
                 onBlur={width1.handleChange}
@@ -87,7 +100,7 @@ export function LShapeForm({ shape, units, onChange, className = '' }: LShapeFor
                 type="number"
                 min="0"
                 max="11.9"
-                step="0.1"
+                step="0.5"
                 value={height1.inches}
                 onChange={(e) => height1.setInches(e.target.value)}
                 onBlur={height1.handleChange}
@@ -120,7 +133,7 @@ export function LShapeForm({ shape, units, onChange, className = '' }: LShapeFor
                 type="number"
                 min="0"
                 max="11.9"
-                step="0.1"
+                step="0.5"
                 value={width2.inches}
                 onChange={(e) => width2.setInches(e.target.value)}
                 onBlur={width2.handleChange}
@@ -153,10 +166,76 @@ export function LShapeForm({ shape, units, onChange, className = '' }: LShapeFor
                 type="number"
                 min="0"
                 max="11.9"
-                step="0.1"
+                step="0.5"
                 value={height2.inches}
                 onChange={(e) => height2.setInches(e.target.value)}
                 onBlur={height2.handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-2">Wall E</label>
+          <div className="flex space-x-2">
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">Feet</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={wallE.feet}
+                onChange={(e) => wallE.setFeet(e.target.value)}
+                onBlur={wallE.handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="0"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">Inches</label>
+              <input
+                type="number"
+                min="0"
+                max="11.9"
+                step="0.5"
+                value={wallE.inches}
+                onChange={(e) => wallE.setInches(e.target.value)}
+                onBlur={wallE.handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-2">Wall F</label>
+          <div className="flex space-x-2">
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">Feet</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={wallF.feet}
+                onChange={(e) => wallF.setFeet(e.target.value)}
+                onBlur={wallF.handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                placeholder="0"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-gray-500 mb-1">Inches</label>
+              <input
+                type="number"
+                min="0"
+                max="11.9"
+                step="0.5"
+                value={wallF.inches}
+                onChange={(e) => wallF.setInches(e.target.value)}
+                onBlur={wallF.handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 placeholder="0"
               />

@@ -10,7 +10,6 @@ an "x".
 
 # BACKLOG
 
-* [ ] BUG: The textboxes for the E and F walls of the L shaped room are missing.
 * [ ] The tile grid should be lined up with the grid on the canvas. The grid and tiles should be fixed to the canvas at
   all times.
 * [ ] Some cleanup
@@ -62,3 +61,4 @@ an "x".
 * [x] BUG: The A and F wall on the L shape do not move when their labels are dragged.
 * [x] Updating the feet and inches textboxes should update the wall labels on the canvas.
     * [x] The walls should adjust as soon as the user has stopped typing for 1 sec.
+* [x] BUG: The textboxes for the E and F walls of the L shaped room are missing.

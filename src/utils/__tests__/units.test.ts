@@ -27,8 +27,8 @@ describe('formatFeetInches', () => {
   })
 
   it('should handle fractional inches correctly', () => {
-    expect(formatFeetInches(1.042)).toBe("1' 1\"") // 1.042 feet = 1' 0.5" → rounds to 1' 1"
-    expect(formatFeetInches(2.125)).toBe("2' 2\"") // 2.125 feet = 2' 1.5" → rounds to 2' 2"
+    expect(formatFeetInches(1.042)).toBe("1' 0.5\"") // 1.042 feet = 1' 0.504" → rounds to 1' 0.5"
+    expect(formatFeetInches(2.125)).toBe("2' 1.5\"") // 2.125 feet = 2' 1.5" → stays 2' 1.5"
   })
 
   it('should handle large values', () => {

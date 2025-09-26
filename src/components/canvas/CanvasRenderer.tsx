@@ -2,21 +2,18 @@ import {useCallback, useEffect, useRef, useState} from 'react';
 import {Point, Shape, TileConfig, Units} from '../../types';
 import {convertShapeToPolygon} from '../../utils/geometry';
 import {
-    drawGrid,
-    drawTiles,
-    drawRoomShape,
-    drawWallLabels,
     calculateWallLabels,
-    getRoomBounds,
-    CANVAS_WIDTH,
     CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    drawGrid,
+    drawRoomShape,
+    drawTiles,
+    drawWallLabels,
+    getRoomBounds,
     PIXELS_PER_FOOT,
     WallLabel
 } from '../../utils/canvasDrawing';
-import {
-    findWallLabelAt,
-    moveWall
-} from '../../utils/wallManipulation';
+import {findWallLabelAt, moveWall} from '../../utils/wallManipulation';
 
 interface CanvasRendererProps {
     shape: Shape;
@@ -29,13 +26,13 @@ interface CanvasRendererProps {
 
 
 export function CanvasRenderer({
-    shape,
-    tileConfig,
-    units,
-    onShapeChange,
-    canvasRef: externalCanvasRef,
-    className = ''
-}: CanvasRendererProps) {
+                                   shape,
+                                   tileConfig,
+                                   units,
+                                   onShapeChange,
+                                   canvasRef: externalCanvasRef,
+                                   className = ''
+                               }: CanvasRendererProps) {
     const internalCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = externalCanvasRef || internalCanvasRef;
     const [pan, setPan] = useState({x: 0, y: 0});
@@ -87,6 +84,7 @@ export function CanvasRenderer({
             // Calculate and draw wall labels
             const labels = calculateWallLabels(vertices);
             setWallLabels(labels);
+            console.log('labels', labels);
             drawWallLabels(ctx, labels, units, isDraggingWall, worldToScreen);
         }
 

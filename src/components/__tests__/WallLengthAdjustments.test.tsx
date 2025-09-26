@@ -131,6 +131,8 @@ describe('WallLengthAdjustments', () => {
       expect(screen.getByText('Wall B')).toBeInTheDocument()
       expect(screen.getByText('Wall C')).toBeInTheDocument()
       expect(screen.getByText('Wall D')).toBeInTheDocument()
+      expect(screen.getByText('Wall E')).toBeInTheDocument()
+      expect(screen.getByText('Wall F')).toBeInTheDocument()
     })
 
     it('should update L-shape when dimension changes', async () => {
@@ -221,7 +223,7 @@ describe('WallLengthAdjustments', () => {
       )
 
       // Find all inches inputs and get the first one (width inches)
-      const widthInchesInputs = screen.getAllByDisplayValue('0.0')
+      const widthInchesInputs = screen.getAllByDisplayValue('0')
       const widthInchesInput = widthInchesInputs[0] // First one should be width inches
       await user.clear(widthInchesInput)
       await user.type(widthInchesInput, '6')
