@@ -10,11 +10,6 @@ an "x".
 
 # BACKLOG
 
-- [ ] BUG: Even though the inches textboxes should increment by 0.5 inches, the walls don't have to move by 0.5 inches
-      when being dragged.
-  - [ ] The walls should move at the same rate as the mouse cursor.
-  - [ ] The mouse cursor must be hovering the label to start dragging the wall, but moving the mouse cursor off the
-        the label won't stop the wall from moving until the mouse button is released.
 - [ ] ENHANCEMENT: Add a tile picker step.
   - [ ] Available tiles should be stored in a JSON file.
   - [ ] Each tile should have a name, dimensions (width and height in inches),
@@ -75,3 +70,8 @@ an "x".
   - [x] Each wall should have a name (A, B, C, etc.), length in inches, and orientation (horizontal or vertical).
   - [x] The walls should be labeled alphabetically, starting with A in the top left corner and going clockwise.
   - [x] The wall objects should be stored in an array in the global state.
+- [x] BUG: Even though the inches textboxes should increment by 0.5 inches, the walls don't have to move by 0.5 inches
+      when being dragged.
+  - [x] The walls should move at the same rate as the mouse cursor.
+  - [x] The mouse cursor must be hovering the label to start dragging the wall, but moving the mouse cursor off the
+        the label won't stop the wall from moving until the mouse button is released.

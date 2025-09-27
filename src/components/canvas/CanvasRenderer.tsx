@@ -37,6 +37,7 @@ export function CanvasRenderer({
   const [wallLabels, setWallLabels] = useState<WallLabel[]>([]);
   const [isDraggingWall, setIsDraggingWall] = useState(false);
   const [dragStart, setDragStart] = useState<Point | null>(null);
+  const [draggedWallIndex, setDraggedWallIndex] = useState<number>(-1);
 
   const worldToScreen = useCallback(
     (point: Point): Point => {
@@ -71,7 +72,6 @@ export function CanvasRenderer({
     // Draw grid fixed to canvas coordinates
     drawGrid(ctx, tileConfig);
 
-    console.log('tileConfig', tileConfig);
     // Now apply transformations for the room content
     ctx.save();
 
@@ -86,7 +86,6 @@ export function CanvasRenderer({
       // Calculate and draw wall labels
       const labels = calculateWallLabels(vertices);
       setWallLabels(labels);
-      console.log('labels', labels);
       drawWallLabels(ctx, labels, units, isDraggingWall, worldToScreen);
     }
 
@@ -112,9 +111,11 @@ export function CanvasRenderer({
     const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
     if (clickedWall !== -1) {
       setIsDraggingWall(true);
+      setDraggedWallIndex(clickedWall);
       setDragStart(screenToWorld(mousePos));
     } else {
       setIsDraggingWall(false);
+      setDraggedWallIndex(-1);
       setDragStart(null);
     }
   };
@@ -133,16 +134,14 @@ export function CanvasRenderer({
       const deltaY = mousePos.y - lastPan.y;
       setPan((prev) => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
       setLastPan(mousePos);
-    } else if (isDraggingWall && dragStart) {
+    } else if (isDraggingWall && dragStart && draggedWallIndex !== -1) {
       // Handle wall dragging
       const currentWorldPos = screenToWorld(mousePos);
       const deltaX = currentWorldPos.x - dragStart.x;
       const deltaY = currentWorldPos.y - dragStart.y;
 
-      const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
-      if (clickedWall !== -1) {
-        moveWall(clickedWall, deltaX, deltaY, walls, updateWall);
-      }
+      // Use the remembered wall index, not the current mouse position
+      moveWall(draggedWallIndex, deltaX, deltaY, walls, updateWall);
       setDragStart(currentWorldPos);
     }
   };
@@ -151,6 +150,7 @@ export function CanvasRenderer({
     setIsPanning(false);
     setIsDraggingWall(false);
     setDragStart(null);
+    setDraggedWallIndex(-1);
   };
 
   // Auto-center room to canvas on wall changes
