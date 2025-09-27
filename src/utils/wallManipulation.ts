@@ -1,6 +1,5 @@
-import { Point, Shape } from '../types';
-import { convertShapeToPolygon } from './geometry';
-import { getRoomBounds } from './canvasDrawing';
+import { Point, Wall } from '../types';
+import { convertWallsToPolygon } from './geometry';
 
 export function isWallVertical(wallIndex: number, vertices: Point[]): boolean {
   if (vertices.length === 0) return false;
@@ -47,13 +46,13 @@ export function moveWall(
   wallIndex: number,
   deltaX: number,
   deltaY: number,
-  shape: Shape,
-  onShapeChange: (shape: Shape) => void
+  walls: Wall[],
+  onWallChange: (wallIndex: number, wall: Partial<Wall>) => void
 ) {
-  if (shape.type === 'rectangle') {
-    moveRectangleWall(wallIndex, deltaX, deltaY, shape, onShapeChange);
-  } else if (shape.type === 'l-shape') {
-    moveLShapeWall(wallIndex, deltaX, deltaY, shape, onShapeChange);
+  if (walls.length === 4) {
+    moveRectangleWall(wallIndex, deltaX, deltaY, walls, onWallChange);
+  } else if (walls.length === 6) {
+    moveLShapeWall(wallIndex, deltaX, deltaY, walls, onWallChange);
   }
 }
 
@@ -61,103 +60,194 @@ export function moveRectangleWall(
   wallIndex: number,
   deltaX: number,
   deltaY: number,
-  shape: Shape,
-  onShapeChange: (shape: Shape) => void
+  walls: Wall[],
+  onWallChange: (wallIndex: number, wall: Partial<Wall>) => void
 ) {
-  const vertices = convertShapeToPolygon(shape);
+  const vertices = convertWallsToPolygon(walls);
   if (vertices.length === 0) return;
 
   const isVertical = isWallVertical(wallIndex, vertices);
-  const newVertices = [...vertices];
 
+  // Snap movement to 0.5 inch increments (1/24 feet)
+  const snapSize = 1/24; // 0.5 inches in feet
+  const snappedDeltaX = Math.round(deltaX / snapSize) * snapSize;
+  const snappedDeltaY = Math.round(deltaY / snapSize) * snapSize;
+
+  // For rectangle: A=top, B=right, C=bottom, D=left
   if (isVertical) {
-    // For vertical walls, only allow horizontal movement
-    const current = vertices[wallIndex];
-    const next = vertices[(wallIndex + 1) % vertices.length];
-
-    newVertices[wallIndex] = { ...current, x: current.x + deltaX };
-    newVertices[(wallIndex + 1) % vertices.length] = { ...next, x: next.x + deltaX };
+    // Moving vertical walls (B or D) affects width
+    const movement = snappedDeltaX;
+    if (wallIndex === 1) { // Wall B (right) - increase width
+      const wallA = walls.find(w => w.name === 'A');
+      const wallC = walls.find(w => w.name === 'C');
+      if (wallA && wallC) {
+        const newWidth = Math.max(0.5, (wallA.lengthInches / 12) + movement);
+        onWallChange(wallA.wallIndex, { lengthInches: newWidth * 12 });
+        onWallChange(wallC.wallIndex, { lengthInches: newWidth * 12 });
+      }
+    } else if (wallIndex === 3) { // Wall D (left) - decrease width
+      const wallA = walls.find(w => w.name === 'A');
+      const wallC = walls.find(w => w.name === 'C');
+      if (wallA && wallC) {
+        const newWidth = Math.max(0.5, (wallA.lengthInches / 12) - movement);
+        onWallChange(wallA.wallIndex, { lengthInches: newWidth * 12 });
+        onWallChange(wallC.wallIndex, { lengthInches: newWidth * 12 });
+      }
+    }
   } else {
-    // For horizontal walls, only allow vertical movement
-    const current = vertices[wallIndex];
-    const next = vertices[(wallIndex + 1) % vertices.length];
-
-    newVertices[wallIndex] = { ...current, y: current.y + deltaY };
-    newVertices[(wallIndex + 1) % vertices.length] = { ...next, y: next.y + deltaY };
+    // Moving horizontal walls (A or C) affects height
+    const movement = snappedDeltaY;
+    if (wallIndex === 0) { // Wall A (top) - decrease height
+      const wallB = walls.find(w => w.name === 'B');
+      const wallD = walls.find(w => w.name === 'D');
+      if (wallB && wallD) {
+        const newHeight = Math.max(0.5, (wallB.lengthInches / 12) - movement);
+        onWallChange(wallB.wallIndex, { lengthInches: newHeight * 12 });
+        onWallChange(wallD.wallIndex, { lengthInches: newHeight * 12 });
+      }
+    } else if (wallIndex === 2) { // Wall C (bottom) - increase height
+      const wallB = walls.find(w => w.name === 'B');
+      const wallD = walls.find(w => w.name === 'D');
+      if (wallB && wallD) {
+        const newHeight = Math.max(0.5, (wallB.lengthInches / 12) + movement);
+        onWallChange(wallB.wallIndex, { lengthInches: newHeight * 12 });
+        onWallChange(wallD.wallIndex, { lengthInches: newHeight * 12 });
+      }
+    }
   }
-
-  const bounds = getRoomBounds(newVertices);
-  const newShape = {
-    type: 'rectangle' as const,
-    width: bounds.maxX - bounds.minX,
-    height: bounds.maxY - bounds.minY
-  };
-  onShapeChange(newShape);
 }
 
 export function moveLShapeWall(
   wallIndex: number,
   deltaX: number,
   deltaY: number,
-  shape: Shape,
-  onShapeChange: (shape: Shape) => void
+  walls: Wall[],
+  onWallChange: (wallIndex: number, wall: Partial<Wall>) => void
 ) {
-  if (shape.type !== 'l-shape') return;
+  const vertices = convertWallsToPolygon(walls);
+  if (vertices.length === 0) return;
 
-  const vertices = convertShapeToPolygon(shape);
   const isVertical = isWallVertical(wallIndex, vertices);
-  const currentShape = shape;
-  let newShape = { ...currentShape };
 
-  // L-shape wall mapping (based on lShapeToPolygon):
-  // Wall 0 (A): top edge (0,0) -> (width1,0) - horizontal wall, move vertically affects position
-  // Wall 1 (B): right edge of first section (width1,0) -> (width1,height1) - vertical wall
-  // Wall 2 (C): inner horizontal edge (width1,height1) -> (width1+width2,height1) - horizontal wall
-  // Wall 3 (D): right edge of second section (width1+width2,height1) -> (width1+width2,height1+height2) - vertical wall
-  // Wall 4 (E): bottom edge (width1+width2,height1+height2) -> (0,height1+height2) - horizontal wall
-  // Wall 5 (F): left edge (0,height1+height2) -> (0,0) - vertical wall
+  // Snap movement to 0.5 inch increments (1/24 feet)
+  const snapSize = 1/24; // 0.5 inches in feet
+  const snappedDeltaX = Math.round(deltaX / snapSize) * snapSize;
+  const snappedDeltaY = Math.round(deltaY / snapSize) * snapSize;
+
+  // For L-shape: A=top, B=right1, C=inner, D=right2, E=bottom, F=left
+  const wallA = walls.find(w => w.name === 'A');
+  const wallB = walls.find(w => w.name === 'B');
+  const wallC = walls.find(w => w.name === 'C');
+  const wallD = walls.find(w => w.name === 'D');
+  const wallE = walls.find(w => w.name === 'E');
+  const wallF = walls.find(w => w.name === 'F');
 
   switch (wallIndex) {
-    case 0: // Wall A: Top edge - horizontal wall
-      if (!isVertical && deltaY !== 0) {
-        // Moving top edge down increases height1, moving up decreases it
-        newShape.height1 = Math.max(0.5, currentShape.height1 - deltaY);
-        newShape.height2 = Math.max(0.5, currentShape.height2 - deltaY);
+    case 0: // Wall A: Top edge - affects total height
+      if (!isVertical && snappedDeltaY !== 0) {
+        const movement = -snappedDeltaY; // Invert because moving up decreases height
+        if (wallB && wallD && wallF) {
+          const currentTotalHeight = wallF.lengthInches / 12;
+          const newTotalHeight = Math.max(1, currentTotalHeight + movement);
+          const currentHeight1 = wallB.lengthInches / 12;
+          const currentHeight2 = wallD.lengthInches / 12;
+
+          // Maintain the ratio between height1 and height2
+          const ratio = currentHeight1 / (currentHeight1 + currentHeight2);
+          const newHeight1 = Math.max(0.5, newTotalHeight * ratio);
+          const newHeight2 = Math.max(0.5, newTotalHeight - newHeight1);
+
+          onWallChange(wallB.wallIndex, { lengthInches: newHeight1 * 12 });
+          onWallChange(wallD.wallIndex, { lengthInches: newHeight2 * 12 });
+          onWallChange(wallF.wallIndex, { lengthInches: newTotalHeight * 12 });
+        }
       }
       break;
 
-    case 1: // Wall B: Right edge of first section - vertical wall
-      if (isVertical && deltaX !== 0) {
-        newShape.width1 = Math.max(0.5, currentShape.width1 + deltaX);
+    case 1: // Wall B: Right edge of first section - affects width1
+      if (isVertical && snappedDeltaX !== 0) {
+        if (wallA) {
+          const newWidth1 = Math.max(0.5, (wallA.lengthInches / 12) + snappedDeltaX);
+          onWallChange(wallA.wallIndex, { lengthInches: newWidth1 * 12 });
+
+          // Update total width (wallE)
+          if (wallC && wallE) {
+            const width2 = wallC.lengthInches / 12;
+            onWallChange(wallE.wallIndex, { lengthInches: (newWidth1 + width2) * 12 });
+          }
+        }
       }
       break;
 
-    case 2: // Wall C: Inner horizontal edge - horizontal wall
-      if (!isVertical && deltaY !== 0) {
-        newShape.height1 = Math.max(0.5, currentShape.height1 + deltaY);
+    case 2: // Wall C: Inner horizontal edge - affects height1
+      if (!isVertical && snappedDeltaY !== 0) {
+        if (wallB) {
+          const newHeight1 = Math.max(0.5, (wallB.lengthInches / 12) + snappedDeltaY);
+          onWallChange(wallB.wallIndex, { lengthInches: newHeight1 * 12 });
+
+          // Update total height (wallF)
+          if (wallD && wallF) {
+            const height2 = wallD.lengthInches / 12;
+            onWallChange(wallF.wallIndex, { lengthInches: (newHeight1 + height2) * 12 });
+          }
+        }
       }
       break;
 
-    case 3: // Wall D: Right edge of second section - vertical wall
-      if (isVertical && deltaX !== 0) {
-        newShape.width2 = Math.max(0.5, currentShape.width2 + deltaX);
+    case 3: // Wall D: Right edge of second section - affects width2
+      if (isVertical && snappedDeltaX !== 0) {
+        if (wallC) {
+          const newWidth2 = Math.max(0.5, (wallC.lengthInches / 12) + snappedDeltaX);
+          onWallChange(wallC.wallIndex, { lengthInches: newWidth2 * 12 });
+
+          // Update total width (wallE)
+          if (wallA && wallE) {
+            const width1 = wallA.lengthInches / 12;
+            onWallChange(wallE.wallIndex, { lengthInches: (width1 + newWidth2) * 12 });
+          }
+        }
       }
       break;
 
-    case 4: // Wall E: Bottom edge - horizontal wall
-      if (!isVertical && deltaY !== 0) {
-        newShape.height1 = Math.max(0.5, currentShape.height1 + deltaY);
-        newShape.height2 = Math.max(0.5, currentShape.height2 + deltaY);
+    case 4: // Wall E: Bottom edge - affects total height
+      if (!isVertical && snappedDeltaY !== 0) {
+        if (wallB && wallD && wallF) {
+          const currentTotalHeight = wallF.lengthInches / 12;
+          const newTotalHeight = Math.max(1, currentTotalHeight + snappedDeltaY);
+          const currentHeight1 = wallB.lengthInches / 12;
+          const currentHeight2 = wallD.lengthInches / 12;
+
+          // Maintain the ratio between height1 and height2
+          const ratio = currentHeight1 / (currentHeight1 + currentHeight2);
+          const newHeight1 = Math.max(0.5, newTotalHeight * ratio);
+          const newHeight2 = Math.max(0.5, newTotalHeight - newHeight1);
+
+          onWallChange(wallB.wallIndex, { lengthInches: newHeight1 * 12 });
+          onWallChange(wallD.wallIndex, { lengthInches: newHeight2 * 12 });
+          onWallChange(wallF.wallIndex, { lengthInches: newTotalHeight * 12 });
+        }
       }
       break;
 
-    case 5: // Wall F: Left edge - vertical wall
-      if (isVertical && deltaX !== 0) {
-        // Moving left edge right decreases width1, moving left increases it
-        newShape.width1 = Math.max(0.5, currentShape.width1 - deltaX);
+    case 5: // Wall F: Left edge - affects total width
+      if (isVertical && snappedDeltaX !== 0) {
+        const movement = -snappedDeltaX; // Invert because moving left increases width
+        if (wallA && wallC && wallE) {
+          const currentTotalWidth = wallE.lengthInches / 12;
+          const newTotalWidth = Math.max(1, currentTotalWidth + movement);
+          const currentWidth1 = wallA.lengthInches / 12;
+          const currentWidth2 = wallC.lengthInches / 12;
+
+          // Maintain the ratio between width1 and width2
+          const ratio = currentWidth1 / (currentWidth1 + currentWidth2);
+          const newWidth1 = Math.max(0.5, newTotalWidth * ratio);
+          const newWidth2 = Math.max(0.5, newTotalWidth - newWidth1);
+
+          onWallChange(wallA.wallIndex, { lengthInches: newWidth1 * 12 });
+          onWallChange(wallC.wallIndex, { lengthInches: newWidth2 * 12 });
+          onWallChange(wallE.wallIndex, { lengthInches: newTotalWidth * 12 });
+        }
       }
       break;
   }
-
-  onShapeChange(newShape);
 }

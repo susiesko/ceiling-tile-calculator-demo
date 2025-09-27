@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {Point} from '../../types';
 import {useAppStore} from '../../store/appStore';
-import {convertShapeToPolygon} from '../../utils/geometry';
+import {convertWallsToPolygon} from '../../utils/geometry';
 import {
     calculateWallLabels,
     CANVAS_HEIGHT,
@@ -25,10 +25,10 @@ export function CanvasRenderer({
                                    canvasRef: externalCanvasRef,
                                    className = ''
                                }: CanvasRendererProps) {
-    const shape = useAppStore((state) => state.shape);
+    const walls = useAppStore((state) => state.walls);
     const tileConfig = useAppStore((state) => state.tileConfig);
     const units = useAppStore((state) => state.units);
-    const updateShape = useAppStore((state) => state.updateShape);
+    const updateWall = useAppStore((state) => state.updateWall);
     const internalCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = externalCanvasRef || internalCanvasRef;
     const [pan, setPan] = useState({x: 0, y: 0});
@@ -71,7 +71,7 @@ export function CanvasRenderer({
         ctx.save();
 
         // Draw room shape
-        const vertices = convertShapeToPolygon(shape);
+        const vertices = convertWallsToPolygon(walls);
         if (vertices.length > 0) {
             // Draw tiles aligned with fixed grid
             drawTiles(ctx, vertices, tileConfig, worldToScreen, getRoomBounds);
@@ -86,7 +86,7 @@ export function CanvasRenderer({
         }
 
         ctx.restore();
-    }, [shape, tileConfig, pan, worldToScreen, isDraggingWall, units]);
+    }, [walls, tileConfig, pan, worldToScreen, isDraggingWall, units]);
 
 
     const handleMouseDown = (event: React.MouseEvent) => {
@@ -137,7 +137,7 @@ export function CanvasRenderer({
 
             const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
             if (clickedWall !== -1) {
-                moveWall(clickedWall, deltaX, deltaY, shape, updateShape);
+                moveWall(clickedWall, deltaX, deltaY, walls, updateWall);
             }
             setDragStart(currentWorldPos);
         }
@@ -149,9 +149,9 @@ export function CanvasRenderer({
         setDragStart(null);
     };
 
-    // Auto-center room to canvas on shape change
+    // Auto-center room to canvas on wall changes
     useEffect(() => {
-        const vertices = convertShapeToPolygon(shape);
+        const vertices = convertWallsToPolygon(walls);
         if (vertices.length === 0) return;
 
         const bounds = getRoomBounds(vertices);
@@ -163,7 +163,7 @@ export function CanvasRenderer({
             x: -roomCenterX * PIXELS_PER_FOOT,
             y: -roomCenterY * PIXELS_PER_FOOT
         });
-    }, [shape]);
+    }, [walls]);
 
     useEffect(() => {
         renderCanvas();

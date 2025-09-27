@@ -1,41 +1,57 @@
-import {LShape} from '../../types';
+import {Wall} from '../../types';
 import {useFeetInchesInput} from '../../hooks/useFeetInchesInput';
 
 interface LShapeFormProps {
-    shape: LShape;
-    onChange: (shape: LShape) => void;
+    walls: Wall[];
+    onWallChange: (wallIndex: number, wall: Partial<Wall>) => void;
     className?: string;
 }
 
-export function LShapeForm({shape, onChange, className = ''}: LShapeFormProps) {
-    const width1 = useFeetInchesInput(shape.width1, (value) => {
-        onChange({...shape, width1: value});
+export function LShapeForm({walls, onWallChange, className = ''}: LShapeFormProps) {
+    // Find walls by name for L-shape: A=top, B=right1, C=inner, D=right2, E=bottom, F=left
+    const wallA = walls.find(w => w.name === 'A');
+    const wallB = walls.find(w => w.name === 'B');
+    const wallC = walls.find(w => w.name === 'C');
+    const wallD = walls.find(w => w.name === 'D');
+    const wallE = walls.find(w => w.name === 'E');
+    const wallF = walls.find(w => w.name === 'F');
+
+    const width1 = useFeetInchesInput(wallA ? wallA.lengthInches / 12 : 0, (value) => {
+        if (wallA) {
+            onWallChange(wallA.wallIndex, { lengthInches: value * 12 });
+        }
     });
 
-    const height1 = useFeetInchesInput(shape.height1, (value) => {
-        onChange({...shape, height1: value});
+    const height1 = useFeetInchesInput(wallB ? wallB.lengthInches / 12 : 0, (value) => {
+        if (wallB) {
+            onWallChange(wallB.wallIndex, { lengthInches: value * 12 });
+        }
     });
 
-    const width2 = useFeetInchesInput(shape.width2, (value) => {
-        onChange({...shape, width2: value});
+    const width2 = useFeetInchesInput(wallC ? wallC.lengthInches / 12 : 0, (value) => {
+        if (wallC) {
+            onWallChange(wallC.wallIndex, { lengthInches: value * 12 });
+        }
     });
 
-    const height2 = useFeetInchesInput(shape.height2, (value) => {
-        onChange({...shape, height2: value});
+    const height2 = useFeetInchesInput(wallD ? wallD.lengthInches / 12 : 0, (value) => {
+        if (wallD) {
+            onWallChange(wallD.wallIndex, { lengthInches: value * 12 });
+        }
     });
 
     // Wall E controls the total width (width1 + width2)
-    const wallE = useFeetInchesInput(shape.width1 + shape.width2, (value) => {
-        // When Wall E (total width) changes, adjust width2 to maintain width1
-        const newWidth2 = Math.max(0.5, value - shape.width1);
-        onChange({...shape, width2: newWidth2});
+    const wallEInput = useFeetInchesInput(wallE ? wallE.lengthInches / 12 : 0, (value) => {
+        if (wallE) {
+            onWallChange(wallE.wallIndex, { lengthInches: value * 12 });
+        }
     });
 
     // Wall F controls the total height (height1 + height2)
-    const wallF = useFeetInchesInput(shape.height1 + shape.height2, (value) => {
-        // When Wall F (total height) changes, adjust height2 to maintain height1
-        const newHeight2 = Math.max(0.5, value - shape.height1);
-        onChange({...shape, height2: newHeight2});
+    const wallFInput = useFeetInchesInput(wallF ? wallF.lengthInches / 12 : 0, (value) => {
+        if (wallF) {
+            onWallChange(wallF.wallIndex, { lengthInches: value * 12 });
+        }
     });
 
     return (
@@ -184,9 +200,9 @@ export function LShapeForm({shape, onChange, className = ''}: LShapeFormProps) {
                                 type="number"
                                 min="0"
                                 step="1"
-                                value={wallE.feet}
-                                onChange={(e) => wallE.setFeet(e.target.value)}
-                                onBlur={wallE.handleChange}
+                                value={wallEInput.feet}
+                                onChange={(e) => wallEInput.setFeet(e.target.value)}
+                                onBlur={wallEInput.handleChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 placeholder="0"
                             />
@@ -198,9 +214,9 @@ export function LShapeForm({shape, onChange, className = ''}: LShapeFormProps) {
                                 min="0"
                                 max="11.9"
                                 step="0.5"
-                                value={wallE.inches}
-                                onChange={(e) => wallE.setInches(e.target.value)}
-                                onBlur={wallE.handleChange}
+                                value={wallEInput.inches}
+                                onChange={(e) => wallEInput.setInches(e.target.value)}
+                                onBlur={wallEInput.handleChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 placeholder="0"
                             />
@@ -217,9 +233,9 @@ export function LShapeForm({shape, onChange, className = ''}: LShapeFormProps) {
                                 type="number"
                                 min="0"
                                 step="1"
-                                value={wallF.feet}
-                                onChange={(e) => wallF.setFeet(e.target.value)}
-                                onBlur={wallF.handleChange}
+                                value={wallFInput.feet}
+                                onChange={(e) => wallFInput.setFeet(e.target.value)}
+                                onBlur={wallFInput.handleChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 placeholder="0"
                             />
@@ -231,9 +247,9 @@ export function LShapeForm({shape, onChange, className = ''}: LShapeFormProps) {
                                 min="0"
                                 max="11.9"
                                 step="0.5"
-                                value={wallF.inches}
-                                onChange={(e) => wallF.setInches(e.target.value)}
-                                onBlur={wallF.handleChange}
+                                value={wallFInput.inches}
+                                onChange={(e) => wallFInput.setInches(e.target.value)}
+                                onBlur={wallFInput.handleChange}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                                 placeholder="0"
                             />

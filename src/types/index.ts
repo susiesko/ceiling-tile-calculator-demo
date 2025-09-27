@@ -19,21 +19,13 @@ export enum TileOrientation {
 
 export type ShapeType = 'rectangle' | 'l-shape';
 
-export interface RectangleShape {
-  type: 'rectangle';
-  width: number;
-  height: number;
-}
 
-export interface LShape {
-  type: 'l-shape';
-  width1: number;
-  height1: number;
-  width2: number;
-  height2: number;
+export interface Wall {
+  name: string; // A, B, C, etc.
+  lengthInches: number; // Length in inches for precision
+  orientation: 'horizontal' | 'vertical';
+  wallIndex: number; // Index in the wall array for ordering
 }
-
-export type Shape = RectangleShape | LShape;
 
 
 export interface TileConfig {
@@ -60,7 +52,7 @@ export interface CalculationResult {
 
 export interface AppState {
   units: Units;
-  shape: Shape;
+  walls: Wall[]; // Array of wall objects
   tileConfig: TileConfig;
   gridConfig: GridConfig;
   calculation: CalculationResult;

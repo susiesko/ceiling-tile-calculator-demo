@@ -1,30 +1,33 @@
 import {ShapeType} from '../../types';
 import {useAppStore} from '../../store/appStore';
 import {ShapeSelector} from './ShapeSelector';
+import {getShapeTypeFromWalls} from '../../utils/wallUtils';
+import {generateWallsFromRectangle, generateWallsFromLShape} from '../../utils/wallUtils';
 
 interface ShapeConfigProps {
     className?: string;
 }
 
-const defaultShapes = {
-    rectangle: {type: 'rectangle' as const, width: 12, height: 12},
-    'l-shape': {type: 'l-shape' as const, width1: 6, height1: 6, width2: 6, height2: 6}
-};
-
 export function ShapeConfig({className = ''}: ShapeConfigProps) {
-    const shape = useAppStore((state) => state.shape);
-    const updateShape = useAppStore((state) => state.updateShape);
+    const walls = useAppStore((state) => state.walls);
+    const updateWalls = useAppStore((state) => state.updateWalls);
+
+    const currentShapeType = getShapeTypeFromWalls(walls);
 
     const handleShapeTypeChange = (shapeType: ShapeType) => {
-        if (shape.type !== shapeType) {
-            updateShape(defaultShapes[shapeType]);
+        if (currentShapeType !== shapeType) {
+            if (shapeType === 'rectangle') {
+                updateWalls(generateWallsFromRectangle(12, 12));
+            } else if (shapeType === 'l-shape') {
+                updateWalls(generateWallsFromLShape(6, 6, 6, 6));
+            }
         }
     };
 
     return (
         <div className={`space-y-6 ${className}`}>
             <ShapeSelector
-                selectedShape={shape.type}
+                selectedShape={currentShapeType}
                 onShapeChange={handleShapeTypeChange}
             />
         </div>

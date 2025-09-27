@@ -1,19 +1,27 @@
-import {RectangleShape} from '../../types';
+import {Wall} from '../../types';
 import {useFeetInchesInput} from '../../hooks/useFeetInchesInput';
 
 interface RectangleFormProps {
-    shape: RectangleShape;
-    onChange: (shape: RectangleShape) => void;
+    walls: Wall[];
+    onWallChange: (wallIndex: number, wall: Partial<Wall>) => void;
     className?: string;
 }
 
-export function RectangleForm({shape, onChange, className = ''}: RectangleFormProps) {
-    const width = useFeetInchesInput(shape.width, (value) => {
-        onChange({...shape, width: value});
+export function RectangleForm({walls, onWallChange, className = ''}: RectangleFormProps) {
+    // Find walls by name for rectangle: A=top, B=right, C=bottom, D=left
+    const wallA = walls.find(w => w.name === 'A');
+    const wallB = walls.find(w => w.name === 'B');
+
+    const width = useFeetInchesInput(wallA ? wallA.lengthInches / 12 : 0, (value) => {
+        if (wallA) {
+            onWallChange(wallA.wallIndex, {lengthInches: value * 12});
+        }
     });
 
-    const height = useFeetInchesInput(shape.height, (value) => {
-        onChange({...shape, height: value});
+    const height = useFeetInchesInput(wallB ? wallB.lengthInches / 12 : 0, (value) => {
+        if (wallB) {
+            onWallChange(wallB.wallIndex, {lengthInches: value * 12});
+        }
     });
 
     return (

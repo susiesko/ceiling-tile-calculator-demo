@@ -10,10 +10,11 @@ an "x".
 
 # BACKLOG
 
-* [ ] Walls should each be stored as an object with properties instead of just an array of numbers.
-    * [ ] Each wall should have a name (A, B, C, etc.), length in inches, and orientation (horizontal or vertical).
-    * [ ] The walls should be labeled alphabetically, starting with A in the top left corner and going clockwise.
-    * [ ] The wall objects should be stored in an array in the global state.
+* [ ] BUG: Even though the inches textboxes should increment by 0.5 inches, the walls don't have to move by 0.5 inches
+  when being dragged.
+    * [ ] The walls should move at the same rate as the mouse cursor.
+    * [ ] The mouse cursor must be hovering the label to start dragging the wall, but moving the mouse cursor off the
+      the label won't stop the wall from moving.
 * [ ] ENHANCEMENT: Add a tile picker step.
     * [ ] Available tiles should be stored in a JSON file.
     * [ ] Each tile should have a name, dimensions (width and height in inches),
@@ -70,3 +71,7 @@ an "x".
     * [x] Get rid of scale text.
 * [x] ENHANCEMENT: The L shaped room SVG on the button in Step 1 to be a bit bigger and look cleaner. It should
   also be oriented to look like an L rather than be upside down.
+* [x] Walls should each be stored as an object with properties instead of just an array of numbers.
+    * [x] Each wall should have a name (A, B, C, etc.), length in inches, and orientation (horizontal or vertical).
+    * [x] The walls should be labeled alphabetically, starting with A in the top left corner and going clockwise.
+    * [x] The wall objects should be stored in an array in the global state.

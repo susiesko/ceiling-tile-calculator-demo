@@ -1,14 +1,11 @@
 import {create} from 'zustand';
 import {persist} from 'zustand/middleware';
-import {AppState, GridConfig, Shape, TileConfig} from '../types';
+import {AppState, GridConfig, TileConfig, Wall} from '../types';
+import {generateWallsFromRectangle} from '../utils/wallUtils';
 
 const defaultAppState: AppState = {
     units: 'feet',
-    shape: {
-        type: 'rectangle',
-        width: 12,
-        height: 12
-    },
+    walls: generateWallsFromRectangle(12, 12),
     tileConfig: {
         size: '2x2',
         orientation: 0
@@ -31,7 +28,8 @@ const defaultAppState: AppState = {
 };
 
 interface AppStore extends AppState {
-    updateShape: (shape: Shape) => void;
+    updateWalls: (walls: Wall[]) => void;
+    updateWall: (wallIndex: number, wall: Partial<Wall>) => void;
     updateTileConfig: (tileConfig: Partial<TileConfig>) => void;
     updateGridConfig: (gridConfig: Partial<GridConfig>) => void;
     resetState: () => void;
@@ -42,10 +40,18 @@ export const useAppStore = create<AppStore>()(
         (set) => ({
             ...defaultAppState,
 
-            updateShape: (shape: Shape) => {
-                console.log('UPDATING SHAPE')
-                console.log('new shape', shape)
-                set({shape});
+            updateWalls: (walls: Wall[]) => {
+                set({walls});
+            },
+
+            updateWall: (wallIndex: number, wallUpdate: Partial<Wall>) => {
+                set((state) => {
+                    const newWalls = [...state.walls];
+                    if (newWalls[wallIndex]) {
+                        newWalls[wallIndex] = {...newWalls[wallIndex], ...wallUpdate};
+                    }
+                    return {walls: newWalls};
+                });
             },
 
             updateTileConfig: (tileConfig: Partial<TileConfig>) => {
@@ -69,7 +75,7 @@ export const useAppStore = create<AppStore>()(
             // Only persist the state, not the actions or calculations
             partialize: (state) => ({
                 units: state.units,
-                shape: state.shape,
+                walls: state.walls,
                 tileConfig: state.tileConfig,
                 gridConfig: state.gridConfig,
                 // Don't persist calculation as it's derived and will be recalculated

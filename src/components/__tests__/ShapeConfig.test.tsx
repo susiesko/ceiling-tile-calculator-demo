@@ -2,24 +2,24 @@ import {beforeEach, describe, expect, it, vi} from 'vitest'
 import {render, screen} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {ShapeConfig} from '../shapes/ShapeConfig'
-import {RectangleShape} from '../../types'
 import {useAppStore} from '../../store/appStore'
+import {generateWallsFromRectangle} from '../../utils/wallUtils'
 
 // Mock the store
 vi.mock('../../store/appStore')
 
 describe('ShapeConfig', () => {
-    const mockUpdateShape = vi.fn()
+    const mockUpdateWalls = vi.fn()
     const mockUseAppStore = vi.mocked(useAppStore)
 
     beforeEach(() => {
-        mockUpdateShape.mockClear()
+        mockUpdateWalls.mockClear()
 
         // Setup default store mock
         mockUseAppStore.mockImplementation((selector: any) => {
             const state = {
-                shape: {type: 'rectangle', width: 10, height: 8} as RectangleShape,
-                updateShape: mockUpdateShape
+                walls: generateWallsFromRectangle(10, 8),
+                updateWalls: mockUpdateWalls
             }
             return selector(state)
         })
@@ -48,13 +48,14 @@ describe('ShapeConfig', () => {
             const lShapeButton = screen.getByText('L-Shape')
             await user.click(lShapeButton)
 
-            expect(mockUpdateShape).toHaveBeenCalledWith({
-                type: 'l-shape',
-                width1: 6,
-                height1: 6,
-                width2: 6,
-                height2: 6
-            })
+            expect(mockUpdateWalls).toHaveBeenCalledWith([
+                {name: 'A', lengthInches: 72, orientation: 'horizontal', wallIndex: 0},
+                {name: 'B', lengthInches: 72, orientation: 'vertical', wallIndex: 1},
+                {name: 'C', lengthInches: 72, orientation: 'horizontal', wallIndex: 2},
+                {name: 'D', lengthInches: 72, orientation: 'vertical', wallIndex: 3},
+                {name: 'E', lengthInches: 144, orientation: 'horizontal', wallIndex: 4},
+                {name: 'F', lengthInches: 144, orientation: 'vertical', wallIndex: 5}
+            ])
         })
     })
 
@@ -67,8 +68,8 @@ describe('ShapeConfig', () => {
             const rectangleButton = screen.getByText('Rectangle')
             await user.click(rectangleButton)
 
-            // Should not call updateShape if same type
-            expect(mockUpdateShape).not.toHaveBeenCalled()
+            // Should not call updateWalls if same type
+            expect(mockUpdateWalls).not.toHaveBeenCalled()
         })
     })
 })

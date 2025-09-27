@@ -1,22 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import {
-  convertShapeToPolygon,
+  convertWallsToPolygon,
   calculatePolygonArea,
   isPointInPolygon,
   validatePolygon,
   snapToGrid
 } from '../geometry'
-import { RectangleShape, LShape } from '../../types'
+import { generateWallsFromRectangle, generateWallsFromLShape } from '../wallUtils'
 
-describe('convertShapeToPolygon', () => {
-  it('should convert rectangle to correct polygon', () => {
-    const rectangle: RectangleShape = {
-      type: 'rectangle',
-      width: 10,
-      height: 8
-    }
-
-    const result = convertShapeToPolygon(rectangle)
+describe('convertWallsToPolygon', () => {
+  it('should convert rectangle walls to correct polygon', () => {
+    const walls = generateWallsFromRectangle(10, 8)
+    const result = convertWallsToPolygon(walls)
 
     expect(result).toEqual([
       { x: 0, y: 0 },
@@ -26,16 +21,9 @@ describe('convertShapeToPolygon', () => {
     ])
   })
 
-  it('should convert L-shape to correct polygon', () => {
-    const lShape: LShape = {
-      type: 'l-shape',
-      width1: 10,
-      height1: 6,
-      width2: 4,
-      height2: 3
-    }
-
-    const result = convertShapeToPolygon(lShape)
+  it('should convert L-shape walls to correct polygon', () => {
+    const walls = generateWallsFromLShape(10, 6, 4, 3)
+    const result = convertWallsToPolygon(walls)
 
     expect(result).toEqual([
       { x: 0, y: 0 },
@@ -47,21 +35,9 @@ describe('convertShapeToPolygon', () => {
     ])
   })
 
-  it('should handle zero dimensions gracefully', () => {
-    const rectangle: RectangleShape = {
-      type: 'rectangle',
-      width: 0,
-      height: 0
-    }
-
-    const result = convertShapeToPolygon(rectangle)
-
-    expect(result).toEqual([
-      { x: 0, y: 0 },
-      { x: 0, y: 0 },
-      { x: 0, y: 0 },
-      { x: 0, y: 0 }
-    ])
+  it('should handle empty walls array gracefully', () => {
+    const result = convertWallsToPolygon([])
+    expect(result).toEqual([])
   })
 })
 

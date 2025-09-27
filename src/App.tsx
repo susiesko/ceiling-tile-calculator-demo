@@ -7,7 +7,7 @@ import {CalculationResults} from './components/CalculationResults';
 import {AccordionSection} from './components/AccordionSection';
 import {WallLengthAdjustments} from './components/WallLengthAdjustments';
 import {TileOrientationControls} from './components/TileOrientationControls';
-import {validateShape} from './utils/validation';
+import {validateWalls} from './utils/validation';
 
 function App() {
     const [openSections, setOpenSections] = useState({
@@ -17,11 +17,11 @@ function App() {
         step4: false
     });
 
-    const shape = useAppStore((state) => state.shape);
+    const walls = useAppStore((state) => state.walls);
     const tileConfig = useAppStore((state) => state.tileConfig);
     const resetState = useAppStore((state) => state.resetState);
 
-    const validation = validateShape(shape);
+    const validation = validateWalls(walls);
 
     const toggleSection = (section: keyof typeof openSections) => {
         setOpenSections(prev => {

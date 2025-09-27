@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
 import {useAppStore} from '../store/appStore';
-import {convertShapeToPolygon} from '../utils/geometry';
+import {convertWallsToPolygon} from '../utils/geometry';
 import {calculateTiles} from '../utils/tileCalculation';
 
 export function useAppState() {
@@ -8,7 +8,7 @@ export function useAppState() {
 
     // Recalculate tiles whenever relevant state changes
     useEffect(() => {
-        const roomVertices = convertShapeToPolygon(store.shape);
+        const roomVertices = convertWallsToPolygon(store.walls);
         if (roomVertices.length > 0) {
             const calculation = calculateTiles(
                 roomVertices,
@@ -20,17 +20,18 @@ export function useAppState() {
             // Update the store with new calculation
             useAppStore.setState({calculation});
         }
-    }, [store.shape, store.tileConfig, store.gridConfig]);
+    }, [store.walls, store.tileConfig, store.gridConfig]);
 
     return {
         state: {
             units: store.units,
-            shape: store.shape,
+            walls: store.walls,
             tileConfig: store.tileConfig,
             gridConfig: store.gridConfig,
             calculation: store.calculation
         },
-        updateShape: store.updateShape,
+        updateWalls: store.updateWalls,
+        updateWall: store.updateWall,
         updateTileConfig: store.updateTileConfig,
         updateGridConfig: store.updateGridConfig,
         resetState: store.resetState

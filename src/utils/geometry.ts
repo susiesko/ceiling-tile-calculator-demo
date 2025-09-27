@@ -1,35 +1,61 @@
-import { Point, Shape, RectangleShape, LShape } from '../types';
+import { Point, Wall } from '../types';
 
-export function convertShapeToPolygon(shape: Shape): Point[] {
-  switch (shape.type) {
-    case 'rectangle':
-      return rectangleToPolygon(shape);
-    case 'l-shape':
-      return lShapeToPolygon(shape);
+/**
+ * Convert walls array to polygon vertices
+ */
+export function convertWallsToPolygon(walls: Wall[]): Point[] {
+  switch (walls.length) {
+    case 4:
+      return convertRectangleWallsToPolygon(walls);
+    case 6:
+      return convertLShapeWallsToPolygon(walls);
     default:
       return [];
   }
 }
 
-function rectangleToPolygon(shape: RectangleShape): Point[] {
+function convertRectangleWallsToPolygon(walls: Wall[]): Point[] {
+  // For rectangle: A=top, B=right, C=bottom, D=left
+  const wallA = walls.find(w => w.name === 'A');
+  const wallB = walls.find(w => w.name === 'B');
+
+  if (!wallA || !wallB) return [];
+
+  const width = wallA.lengthInches / 12;
+  const height = wallB.lengthInches / 12;
+
   return [
     { x: 0, y: 0 },
-    { x: shape.width, y: 0 },
-    { x: shape.width, y: shape.height },
-    { x: 0, y: shape.height }
+    { x: width, y: 0 },
+    { x: width, y: height },
+    { x: 0, y: height }
   ];
 }
 
-function lShapeToPolygon(shape: LShape): Point[] {
+function convertLShapeWallsToPolygon(walls: Wall[]): Point[] {
+  // For L-shape: A=top, B=right1, C=inner, D=right2, E=bottom, F=left
+  const wallA = walls.find(w => w.name === 'A');
+  const wallB = walls.find(w => w.name === 'B');
+  const wallC = walls.find(w => w.name === 'C');
+  const wallD = walls.find(w => w.name === 'D');
+
+  if (!wallA || !wallB || !wallC || !wallD) return [];
+
+  const width1 = wallA.lengthInches / 12;
+  const height1 = wallB.lengthInches / 12;
+  const width2 = wallC.lengthInches / 12;
+  const height2 = wallD.lengthInches / 12;
+
   return [
     { x: 0, y: 0 },
-    { x: shape.width1, y: 0 },
-    { x: shape.width1, y: shape.height1 },
-    { x: shape.width1 + shape.width2, y: shape.height1 },
-    { x: shape.width1 + shape.width2, y: shape.height1 + shape.height2 },
-    { x: 0, y: shape.height1 + shape.height2 }
+    { x: width1, y: 0 },
+    { x: width1, y: height1 },
+    { x: width1 + width2, y: height1 },
+    { x: width1 + width2, y: height1 + height2 },
+    { x: 0, y: height1 + height2 }
   ];
 }
+
 
 
 export function calculatePolygonArea(vertices: Point[]): number {

@@ -1,5 +1,5 @@
-import {Shape} from '../types';
-import {convertShapeToPolygon} from './geometry';
+import {Wall} from '../types';
+import {convertWallsToPolygon} from './geometry';
 
 export interface ValidationResult {
     isValid: boolean;
@@ -7,7 +7,7 @@ export interface ValidationResult {
     warnings: string[];
 }
 
-export function validateShape(shape: Shape): ValidationResult {
+export function validateWalls(walls: Wall[]): ValidationResult {
     const result: ValidationResult = {
         isValid: true,
         errors: [],
@@ -15,41 +15,21 @@ export function validateShape(shape: Shape): ValidationResult {
     };
 
     const unitLabel = 'feet';
-    const minDimension = 0.5; // 0.5 ft
+    const minDimensionInches = 6; // 6 inches minimum
 
-    switch (shape.type) {
-        case 'rectangle':
-            if (shape.width <= 0) {
-                result.errors.push('Width must be greater than 0');
-                result.isValid = false;
-            }
-            if (shape.height <= 0) {
-                result.errors.push('Height must be greater than 0');
-                result.isValid = false;
-            }
-            if (shape.width < minDimension) {
-                result.warnings.push(`Width is very small (minimum recommended: ${minDimension} ${unitLabel})`);
-            }
-            if (shape.height < minDimension) {
-                result.warnings.push(`Height is very small (minimum recommended: ${minDimension} ${unitLabel})`);
-            }
-            break;
-
-        case 'l-shape':
-            if (shape.width1 <= 0 || shape.width2 <= 0) {
-                result.errors.push('All widths must be greater than 0');
-                result.isValid = false;
-            }
-            if (shape.height1 <= 0 || shape.height2 <= 0) {
-                result.errors.push('All heights must be greater than 0');
-                result.isValid = false;
-            }
-            break;
-
+    // Validate each wall
+    for (const wall of walls) {
+        if (wall.lengthInches <= 0) {
+            result.errors.push(`Wall ${wall.name} must have a length greater than 0`);
+            result.isValid = false;
+        }
+        if (wall.lengthInches < minDimensionInches) {
+            result.warnings.push(`Wall ${wall.name} is very small (minimum recommended: ${minDimensionInches/12} ${unitLabel})`);
+        }
     }
 
     // Check if room is too large
-    const vertices = convertShapeToPolygon(shape);
+    const vertices = convertWallsToPolygon(walls);
     if (vertices.length > 0) {
         const bounds = getBounds(vertices);
         const area = Math.abs(bounds.maxX - bounds.minX) * Math.abs(bounds.maxY - bounds.minY);
