@@ -1,193 +1,195 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
-import {Point} from '../../types';
-import {useAppStore} from '../../store/appStore';
-import {convertWallsToPolygon} from '../../utils/geometry';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Point } from '../../types';
+import { useAppStore } from '../../store/appStore';
+import { convertWallsToPolygon } from '../../utils/geometry';
 import {
-    calculateWallLabels,
-    CANVAS_HEIGHT,
-    CANVAS_WIDTH,
-    drawGrid,
-    drawRoomShape,
-    drawTiles,
-    drawWallLabels,
-    getRoomBounds,
-    PIXELS_PER_FOOT,
-    WallLabel
+  calculateWallLabels,
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  drawGrid,
+  drawRoomShape,
+  drawTiles,
+  drawWallLabels,
+  getRoomBounds,
+  PIXELS_PER_FOOT,
+  WallLabel,
 } from '../../utils/canvasDrawing';
-import {findWallLabelAt, moveWall} from '../../utils/wallManipulation';
+import { findWallLabelAt, moveWall } from '../../utils/wallManipulation';
 
 interface CanvasRendererProps {
-    canvasRef?: React.RefObject<HTMLCanvasElement>;
-    className?: string;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
+  className?: string;
 }
 
 export function CanvasRenderer({
-                                   canvasRef: externalCanvasRef,
-                                   className = ''
-                               }: CanvasRendererProps) {
-    const walls = useAppStore((state) => state.walls);
-    const tileConfig = useAppStore((state) => state.tileConfig);
-    const units = useAppStore((state) => state.units);
-    const updateWall = useAppStore((state) => state.updateWall);
-    const internalCanvasRef = useRef<HTMLCanvasElement>(null);
-    const canvasRef = externalCanvasRef || internalCanvasRef;
-    const [pan, setPan] = useState({x: 0, y: 0});
-    const [lastPan, setLastPan] = useState({x: 0, y: 0});
-    const [isPanning, setIsPanning] = useState(false);
-    const [wallLabels, setWallLabels] = useState<WallLabel[]>([]);
-    const [isDraggingWall, setIsDraggingWall] = useState(false);
-    const [dragStart, setDragStart] = useState<Point | null>(null);
+  canvasRef: externalCanvasRef,
+  className = '',
+}: CanvasRendererProps) {
+  const walls = useAppStore((state) => state.walls);
+  const tileConfig = useAppStore((state) => state.tileConfig);
+  const units = useAppStore((state) => state.units);
+  const updateWall = useAppStore((state) => state.updateWall);
+  const internalCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = externalCanvasRef || internalCanvasRef;
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [lastPan, setLastPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [wallLabels, setWallLabels] = useState<WallLabel[]>([]);
+  const [isDraggingWall, setIsDraggingWall] = useState(false);
+  const [dragStart, setDragStart] = useState<Point | null>(null);
 
-    const worldToScreen = useCallback((point: Point): Point => {
-        return {
-            x: (point.x * PIXELS_PER_FOOT + pan.x) + CANVAS_WIDTH / 2,
-            y: (point.y * PIXELS_PER_FOOT + pan.y) + CANVAS_HEIGHT / 2
-        };
-    }, [pan]);
+  const worldToScreen = useCallback(
+    (point: Point): Point => {
+      return {
+        x: point.x * PIXELS_PER_FOOT + pan.x + CANVAS_WIDTH / 2,
+        y: point.y * PIXELS_PER_FOOT + pan.y + CANVAS_HEIGHT / 2,
+      };
+    },
+    [pan]
+  );
 
-    const screenToWorld = useCallback((point: Point): Point => {
-        return {
-            x: (point.x - CANVAS_WIDTH / 2 - pan.x) / PIXELS_PER_FOOT,
-            y: (point.y - CANVAS_HEIGHT / 2 - pan.y) / PIXELS_PER_FOOT
-        };
-    }, [pan]);
+  const screenToWorld = useCallback(
+    (point: Point): Point => {
+      return {
+        x: (point.x - CANVAS_WIDTH / 2 - pan.x) / PIXELS_PER_FOOT,
+        y: (point.y - CANVAS_HEIGHT / 2 - pan.y) / PIXELS_PER_FOOT,
+      };
+    },
+    [pan]
+  );
 
+  const renderCanvas = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const renderCanvas = useCallback(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+    // Clear canvas
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        // Clear canvas
-        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+    // Draw grid fixed to canvas coordinates
+    drawGrid(ctx, tileConfig);
 
-        // Draw grid fixed to canvas coordinates
-        drawGrid(ctx, tileConfig);
+    console.log('tileConfig', tileConfig);
+    // Now apply transformations for the room content
+    ctx.save();
 
-        console.log('tileConfig', tileConfig)
-        // Now apply transformations for the room content
-        ctx.save();
+    // Draw room shape
+    const vertices = convertWallsToPolygon(walls);
+    if (vertices.length > 0) {
+      // Draw tiles aligned with fixed grid
+      drawTiles(ctx, vertices, tileConfig, worldToScreen, getRoomBounds);
 
-        // Draw room shape
-        const vertices = convertWallsToPolygon(walls);
-        if (vertices.length > 0) {
-            // Draw tiles aligned with fixed grid
-            drawTiles(ctx, vertices, tileConfig, worldToScreen, getRoomBounds);
+      drawRoomShape(ctx, vertices, worldToScreen);
 
-            drawRoomShape(ctx, vertices, worldToScreen);
+      // Calculate and draw wall labels
+      const labels = calculateWallLabels(vertices);
+      setWallLabels(labels);
+      console.log('labels', labels);
+      drawWallLabels(ctx, labels, units, isDraggingWall, worldToScreen);
+    }
 
-            // Calculate and draw wall labels
-            const labels = calculateWallLabels(vertices);
-            setWallLabels(labels);
-            console.log('labels', labels);
-            drawWallLabels(ctx, labels, units, isDraggingWall, worldToScreen);
-        }
+    ctx.restore();
+  }, [walls, tileConfig, pan, worldToScreen, isDraggingWall, units]);
 
-        ctx.restore();
-    }, [walls, tileConfig, pan, worldToScreen, isDraggingWall, units]);
+  const handleMouseDown = (event: React.MouseEvent) => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
 
-
-    const handleMouseDown = (event: React.MouseEvent) => {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (!rect) return;
-
-        const mousePos = {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
-
-        if (event.shiftKey) {
-            setIsPanning(true);
-            setLastPan(mousePos);
-            return;
-        }
-
-        // Check if clicking on a wall label
-        const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
-        if (clickedWall !== -1) {
-            setIsDraggingWall(true);
-            setDragStart(screenToWorld(mousePos));
-        } else {
-            setIsDraggingWall(false);
-            setDragStart(null);
-        }
+    const mousePos = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
     };
 
-    const handleMouseMove = (event: React.MouseEvent) => {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (!rect) return;
+    if (event.shiftKey) {
+      setIsPanning(true);
+      setLastPan(mousePos);
+      return;
+    }
 
-        const mousePos = {
-            x: event.clientX - rect.left,
-            y: event.clientY - rect.top
-        };
+    // Check if clicking on a wall label
+    const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
+    if (clickedWall !== -1) {
+      setIsDraggingWall(true);
+      setDragStart(screenToWorld(mousePos));
+    } else {
+      setIsDraggingWall(false);
+      setDragStart(null);
+    }
+  };
 
-        if (isPanning) {
-            const deltaX = mousePos.x - lastPan.x;
-            const deltaY = mousePos.y - lastPan.y;
-            setPan(prev => ({x: prev.x + deltaX, y: prev.y + deltaY}));
-            setLastPan(mousePos);
-        } else if (isDraggingWall && dragStart) {
-            // Handle wall dragging
-            const currentWorldPos = screenToWorld(mousePos);
-            const deltaX = currentWorldPos.x - dragStart.x;
-            const deltaY = currentWorldPos.y - dragStart.y;
+  const handleMouseMove = (event: React.MouseEvent) => {
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
 
-            const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
-            if (clickedWall !== -1) {
-                moveWall(clickedWall, deltaX, deltaY, walls, updateWall);
-            }
-            setDragStart(currentWorldPos);
-        }
+    const mousePos = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
     };
 
-    const handleMouseUp = () => {
-        setIsPanning(false);
-        setIsDraggingWall(false);
-        setDragStart(null);
-    };
+    if (isPanning) {
+      const deltaX = mousePos.x - lastPan.x;
+      const deltaY = mousePos.y - lastPan.y;
+      setPan((prev) => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
+      setLastPan(mousePos);
+    } else if (isDraggingWall && dragStart) {
+      // Handle wall dragging
+      const currentWorldPos = screenToWorld(mousePos);
+      const deltaX = currentWorldPos.x - dragStart.x;
+      const deltaY = currentWorldPos.y - dragStart.y;
 
-    // Auto-center room to canvas on wall changes
-    useEffect(() => {
-        const vertices = convertWallsToPolygon(walls);
-        if (vertices.length === 0) return;
+      const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
+      if (clickedWall !== -1) {
+        moveWall(clickedWall, deltaX, deltaY, walls, updateWall);
+      }
+      setDragStart(currentWorldPos);
+    }
+  };
 
-        const bounds = getRoomBounds(vertices);
+  const handleMouseUp = () => {
+    setIsPanning(false);
+    setIsDraggingWall(false);
+    setDragStart(null);
+  };
 
-        // Center the room
-        const roomCenterX = (bounds.minX + bounds.maxX) / 2;
-        const roomCenterY = (bounds.minY + bounds.maxY) / 2;
-        setPan({
-            x: -roomCenterX * PIXELS_PER_FOOT,
-            y: -roomCenterY * PIXELS_PER_FOOT
-        });
-    }, [walls]);
+  // Auto-center room to canvas on wall changes
+  useEffect(() => {
+    const vertices = convertWallsToPolygon(walls);
+    if (vertices.length === 0) return;
 
-    useEffect(() => {
-        renderCanvas();
-    }, [renderCanvas]);
+    const bounds = getRoomBounds(vertices);
 
-    return (
-        <div className={`space-y-4 ${className}`}>
+    // Center the room
+    const roomCenterX = (bounds.minX + bounds.maxX) / 2;
+    const roomCenterY = (bounds.minY + bounds.maxY) / 2;
+    setPan({
+      x: -roomCenterX * PIXELS_PER_FOOT,
+      y: -roomCenterY * PIXELS_PER_FOOT,
+    });
+  }, [walls]);
 
-            <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
-                <canvas
-                    ref={canvasRef}
-                    width={CANVAS_WIDTH}
-                    height={CANVAS_HEIGHT}
-                    onMouseDown={handleMouseDown}
-                    onMouseMove={handleMouseMove}
-                    onMouseUp={handleMouseUp}
-                    className="cursor-pointer"
-                />
-            </div>
+  useEffect(() => {
+    renderCanvas();
+  }, [renderCanvas]);
 
-            <div className="text-sm text-gray-600 space-y-1">
-                <p>• Shift+click and drag to pan the view</p>
-            </div>
+  return (
+    <div className={`space-y-4 ${className}`}>
+      <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          className="cursor-pointer"
+        />
+      </div>
 
-        </div>
-    );
+      <div className="text-sm text-gray-600 space-y-1">
+        <p>• Shift+click and drag to pan the view</p>
+      </div>
+    </div>
+  );
 }

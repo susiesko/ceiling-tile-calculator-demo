@@ -13,15 +13,12 @@ export interface WallLabel {
   letter: string;
 }
 
-export function drawGrid(
-  ctx: CanvasRenderingContext2D,
-  tileConfig: TileConfig
-) {
+export function drawGrid(ctx: CanvasRenderingContext2D, tileConfig: TileConfig) {
   ctx.strokeStyle = '#f3f4f6';
   ctx.lineWidth = 1;
 
   // Calculate tile size in pixels - fixed to canvas
-  let tileWidthPixels = 2 * PIXELS_PER_FOOT;  // default 2x2
+  let tileWidthPixels = 2 * PIXELS_PER_FOOT; // default 2x2
   let tileHeightPixels = 2 * PIXELS_PER_FOOT;
 
   if (tileConfig.size === '2x4') {
@@ -64,7 +61,7 @@ export function drawTiles(
   ctx.lineWidth = 1;
 
   // Calculate tile size in pixels - same as fixed grid
-  let tileWidthPixels = 2 * PIXELS_PER_FOOT;  // default 2x2
+  let tileWidthPixels = 2 * PIXELS_PER_FOOT; // default 2x2
   let tileHeightPixels = 2 * PIXELS_PER_FOOT;
 
   if (tileConfig.size === '2x4') {
@@ -137,7 +134,8 @@ export function drawWallLabels(
 
   labels.forEach((label) => {
     const screenPos = worldToScreen(label.midpoint);
-    const lengthText = units === 'feet' ? formatFeetInches(label.length) : `${label.length.toFixed(1)}m`;
+    const lengthText =
+      units === 'feet' ? formatFeetInches(label.length) : `${label.length.toFixed(1)}m`;
 
     // Offset label from wall
     const offsetDistance = 35;
@@ -162,21 +160,21 @@ export function drawWallLabels(
     const isDragging = isActive && isDraggingWall;
 
     // Draw label background
-    ctx.fillStyle = isDragging ? '#dcfce7' : (isActive ? '#fef3c7' : '#ffffff');
-    ctx.strokeStyle = isDragging ? '#16a34a' : (isActive ? '#f59e0b' : '#d1d5db');
+    ctx.fillStyle = isDragging ? '#dcfce7' : isActive ? '#fef3c7' : '#ffffff';
+    ctx.strokeStyle = isDragging ? '#16a34a' : isActive ? '#f59e0b' : '#d1d5db';
     ctx.lineWidth = isDragging ? 3 : 2;
 
     ctx.fillRect(labelX - bgWidth / 2, labelY - bgHeight / 2, bgWidth, bgHeight);
     ctx.strokeRect(labelX - bgWidth / 2, labelY - bgHeight / 2, bgWidth, bgHeight);
 
     // Draw letter (larger, prominent)
-    ctx.fillStyle = isDragging ? '#166534' : (isActive ? '#92400e' : '#1f2937');
+    ctx.fillStyle = isDragging ? '#166534' : isActive ? '#92400e' : '#1f2937';
     ctx.font = '16px system-ui, sans-serif';
     ctx.textBaseline = 'middle';
     ctx.fillText(label.letter, labelX, labelY - 8);
 
     // Draw length measurement (smaller, below letter)
-    ctx.fillStyle = isDragging ? '#166534' : (isActive ? '#92400e' : '#6b7280');
+    ctx.fillStyle = isDragging ? '#166534' : isActive ? '#92400e' : '#6b7280';
     ctx.font = '12px system-ui, sans-serif';
     ctx.fillText(lengthText, labelX, labelY + 8);
   });
@@ -191,12 +189,10 @@ export function calculateWallLabels(vertices: Point[]): WallLabel[] {
 
     const midpoint: Point = {
       x: (current.x + next.x) / 2,
-      y: (current.y + next.y) / 2
+      y: (current.y + next.y) / 2,
     };
 
-    const length = Math.sqrt(
-      Math.pow(next.x - current.x, 2) + Math.pow(next.y - current.y, 2)
-    );
+    const length = Math.sqrt(Math.pow(next.x - current.x, 2) + Math.pow(next.y - current.y, 2));
 
     const angle = Math.atan2(next.y - current.y, next.x - current.x);
 
@@ -208,7 +204,7 @@ export function calculateWallLabels(vertices: Point[]): WallLabel[] {
       length,
       angle,
       wallIndex: i,
-      letter
+      letter,
     });
   }
 
@@ -216,8 +212,10 @@ export function calculateWallLabels(vertices: Point[]): WallLabel[] {
 }
 
 export function getRoomBounds(vertices: Point[]) {
-  let minX = vertices[0].x, maxX = vertices[0].x;
-  let minY = vertices[0].y, maxY = vertices[0].y;
+  let minX = vertices[0].x,
+    maxX = vertices[0].x;
+  let minY = vertices[0].y,
+    maxY = vertices[0].y;
 
   for (const vertex of vertices) {
     minX = Math.min(minX, vertex.x);

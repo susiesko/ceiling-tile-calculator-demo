@@ -69,7 +69,7 @@ export function moveRectangleWall(
   const isVertical = isWallVertical(wallIndex, vertices);
 
   // Snap movement to 0.5 inch increments (1/24 feet)
-  const snapSize = 1/24; // 0.5 inches in feet
+  const snapSize = 1 / 24; // 0.5 inches in feet
   const snappedDeltaX = Math.round(deltaX / snapSize) * snapSize;
   const snappedDeltaY = Math.round(deltaY / snapSize) * snapSize;
 
@@ -77,19 +77,21 @@ export function moveRectangleWall(
   if (isVertical) {
     // Moving vertical walls (B or D) affects width
     const movement = snappedDeltaX;
-    if (wallIndex === 1) { // Wall B (right) - increase width
-      const wallA = walls.find(w => w.name === 'A');
-      const wallC = walls.find(w => w.name === 'C');
+    if (wallIndex === 1) {
+      // Wall B (right) - increase width
+      const wallA = walls.find((w) => w.name === 'A');
+      const wallC = walls.find((w) => w.name === 'C');
       if (wallA && wallC) {
-        const newWidth = Math.max(0.5, (wallA.lengthInches / 12) + movement);
+        const newWidth = Math.max(0.5, wallA.lengthInches / 12 + movement);
         onWallChange(wallA.wallIndex, { lengthInches: newWidth * 12 });
         onWallChange(wallC.wallIndex, { lengthInches: newWidth * 12 });
       }
-    } else if (wallIndex === 3) { // Wall D (left) - decrease width
-      const wallA = walls.find(w => w.name === 'A');
-      const wallC = walls.find(w => w.name === 'C');
+    } else if (wallIndex === 3) {
+      // Wall D (left) - decrease width
+      const wallA = walls.find((w) => w.name === 'A');
+      const wallC = walls.find((w) => w.name === 'C');
       if (wallA && wallC) {
-        const newWidth = Math.max(0.5, (wallA.lengthInches / 12) - movement);
+        const newWidth = Math.max(0.5, wallA.lengthInches / 12 - movement);
         onWallChange(wallA.wallIndex, { lengthInches: newWidth * 12 });
         onWallChange(wallC.wallIndex, { lengthInches: newWidth * 12 });
       }
@@ -97,19 +99,21 @@ export function moveRectangleWall(
   } else {
     // Moving horizontal walls (A or C) affects height
     const movement = snappedDeltaY;
-    if (wallIndex === 0) { // Wall A (top) - decrease height
-      const wallB = walls.find(w => w.name === 'B');
-      const wallD = walls.find(w => w.name === 'D');
+    if (wallIndex === 0) {
+      // Wall A (top) - decrease height
+      const wallB = walls.find((w) => w.name === 'B');
+      const wallD = walls.find((w) => w.name === 'D');
       if (wallB && wallD) {
-        const newHeight = Math.max(0.5, (wallB.lengthInches / 12) - movement);
+        const newHeight = Math.max(0.5, wallB.lengthInches / 12 - movement);
         onWallChange(wallB.wallIndex, { lengthInches: newHeight * 12 });
         onWallChange(wallD.wallIndex, { lengthInches: newHeight * 12 });
       }
-    } else if (wallIndex === 2) { // Wall C (bottom) - increase height
-      const wallB = walls.find(w => w.name === 'B');
-      const wallD = walls.find(w => w.name === 'D');
+    } else if (wallIndex === 2) {
+      // Wall C (bottom) - increase height
+      const wallB = walls.find((w) => w.name === 'B');
+      const wallD = walls.find((w) => w.name === 'D');
       if (wallB && wallD) {
-        const newHeight = Math.max(0.5, (wallB.lengthInches / 12) + movement);
+        const newHeight = Math.max(0.5, wallB.lengthInches / 12 + movement);
         onWallChange(wallB.wallIndex, { lengthInches: newHeight * 12 });
         onWallChange(wallD.wallIndex, { lengthInches: newHeight * 12 });
       }
@@ -130,17 +134,17 @@ export function moveLShapeWall(
   const isVertical = isWallVertical(wallIndex, vertices);
 
   // Snap movement to 0.5 inch increments (1/24 feet)
-  const snapSize = 1/24; // 0.5 inches in feet
+  const snapSize = 1 / 24; // 0.5 inches in feet
   const snappedDeltaX = Math.round(deltaX / snapSize) * snapSize;
   const snappedDeltaY = Math.round(deltaY / snapSize) * snapSize;
 
   // For L-shape: A=top, B=right1, C=inner, D=right2, E=bottom, F=left
-  const wallA = walls.find(w => w.name === 'A');
-  const wallB = walls.find(w => w.name === 'B');
-  const wallC = walls.find(w => w.name === 'C');
-  const wallD = walls.find(w => w.name === 'D');
-  const wallE = walls.find(w => w.name === 'E');
-  const wallF = walls.find(w => w.name === 'F');
+  const wallA = walls.find((w) => w.name === 'A');
+  const wallB = walls.find((w) => w.name === 'B');
+  const wallC = walls.find((w) => w.name === 'C');
+  const wallD = walls.find((w) => w.name === 'D');
+  const wallE = walls.find((w) => w.name === 'E');
+  const wallF = walls.find((w) => w.name === 'F');
 
   switch (wallIndex) {
     case 0: // Wall A: Top edge - affects total height
@@ -167,7 +171,7 @@ export function moveLShapeWall(
     case 1: // Wall B: Right edge of first section - affects width1
       if (isVertical && snappedDeltaX !== 0) {
         if (wallA) {
-          const newWidth1 = Math.max(0.5, (wallA.lengthInches / 12) + snappedDeltaX);
+          const newWidth1 = Math.max(0.5, wallA.lengthInches / 12 + snappedDeltaX);
           onWallChange(wallA.wallIndex, { lengthInches: newWidth1 * 12 });
 
           // Update total width (wallE)
@@ -182,7 +186,7 @@ export function moveLShapeWall(
     case 2: // Wall C: Inner horizontal edge - affects height1
       if (!isVertical && snappedDeltaY !== 0) {
         if (wallB) {
-          const newHeight1 = Math.max(0.5, (wallB.lengthInches / 12) + snappedDeltaY);
+          const newHeight1 = Math.max(0.5, wallB.lengthInches / 12 + snappedDeltaY);
           onWallChange(wallB.wallIndex, { lengthInches: newHeight1 * 12 });
 
           // Update total height (wallF)
@@ -197,7 +201,7 @@ export function moveLShapeWall(
     case 3: // Wall D: Right edge of second section - affects width2
       if (isVertical && snappedDeltaX !== 0) {
         if (wallC) {
-          const newWidth2 = Math.max(0.5, (wallC.lengthInches / 12) + snappedDeltaX);
+          const newWidth2 = Math.max(0.5, wallC.lengthInches / 12 + snappedDeltaX);
           onWallChange(wallC.wallIndex, { lengthInches: newWidth2 * 12 });
 
           // Update total width (wallE)

@@ -5,30 +5,35 @@ A comprehensive web application for calculating ceiling tile requirements with s
 ## Features
 
 ### Shape Support
+
 - **Presets**: Rectangle, L-shape, T-shape, U-shape with parametrized dimensions
 - **Custom Polygons**: Free-draw polygons with vertex manipulation
 - **Cutouts**: Rectangular and rounded cutouts for columns, stairwells, etc.
 - **Units**: Toggle between feet/inches and meters/centimeters
 
 ### Tile Configuration
+
 - **Tile Sizes**: 2×2 and 2×4 tiles
 - **Orientation**: 0° and 90° rotation
 - **Border Support**: Optional uniform border width
 - **Grid Control**: Adjustable origin and offset
 
 ### Visualization
+
 - **Interactive Canvas**: Real-time polygon and tile visualization
 - **Custom Drawing**: Click to add vertices, drag to move them
 - **Zoom & Pan**: Mouse wheel zoom, Shift+click to pan
 - **Grid Overlay**: Snapping grid for precise placement
 
 ### Calculations
+
 - **Accurate Counting**: Full vs partial tiles with intersection algorithms
 - **Waste Factor**: Automatic calculation of material waste
 - **Cost Estimation**: Optional price per tile for budget planning
 - **Performance**: Handles rooms up to 2000 sq ft smoothly
 
 ### Data Management
+
 - **Auto-save**: State persisted to localStorage
 - **Export Options**:
   - PNG image of room layout
@@ -39,23 +44,27 @@ A comprehensive web application for calculating ceiling tile requirements with s
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 20.19+ or 22.12+
 - npm or yarn
 
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd ceiling-tile-calculator-demo
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start development server:
+
 ```bash
 npm run dev
 ```
@@ -73,12 +82,14 @@ The built files will be in the `dist` directory.
 ## Usage
 
 ### Basic Room Setup
+
 1. Select a room shape from the presets (Rectangle, L, T, U) or choose Custom
 2. Enter dimensions in your preferred units (feet or meters)
 3. Configure tile size and orientation
 4. View real-time calculations and visualization
 
 ### Custom Polygon Drawing
+
 1. Select "Custom" shape type
 2. Click on the canvas to add vertices
 3. Drag vertices to adjust the shape
@@ -86,12 +97,14 @@ The built files will be in the `dist` directory.
 5. Scroll to zoom in/out
 
 ### Adding Cutouts
+
 1. Navigate to the Cutouts section
 2. Choose rectangle or rounded cutout type
 3. Set position and dimensions
 4. Click "Add Cutout" to place it
 
 ### Exporting Results
+
 - **PNG Image**: Download a visual representation of the room layout
 - **Configuration**: Save current settings as a JSON file
 - **Shopping List**: Generate a text file with material requirements
@@ -99,17 +112,20 @@ The built files will be in the `dist` directory.
 ## Technical Architecture
 
 ### Core Technologies
+
 - **React** + **TypeScript**: Component-based UI with type safety
 - **Tailwind CSS**: Utility-first styling with neutral design
 - **Canvas API**: High-performance 2D graphics rendering
 - **Vite**: Fast development and build tooling
 
 ### Key Algorithms
+
 - **Polygon Clipping**: Uses martinez-polygon-clipping for accurate tile-room intersections
 - **Tile Grid Generation**: Efficient spatial indexing for large room support
 - **Validation**: Real-time polygon validation preventing self-intersections
 
 ### File Structure
+
 ```
 src/
 ├── components/           # React components

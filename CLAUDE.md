@@ -123,9 +123,9 @@ src/
 - **Unit Tests**: Algorithm testing for geometry, tile calculation, and validation utilities
 - **Component Tests**: React Testing Library for component behavior and user interactions
 - **Test Commands**:
-    - `npm test` - Interactive test runner
-    - `npm run test:run` - Single test run for CI
-    - `npm run test:ui` - Vitest UI for debugging
+  - `npm test` - Interactive test runner
+  - `npm run test:run` - Single test run for CI
+  - `npm run test:ui` - Vitest UI for debugging
 
 ### Build & Deployment
 

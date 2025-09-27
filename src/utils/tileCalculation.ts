@@ -1,166 +1,159 @@
-import {CalculationResult, Dimensions, GridConfig, Point, TileConfig} from '../types';
-import {calculatePolygonArea, isPointInPolygon} from './geometry';
+import { CalculationResult, Dimensions, GridConfig, Point, TileConfig } from '../types';
+import { calculatePolygonArea, isPointInPolygon } from './geometry';
 
 export interface TileCell {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    coverage: number; // 0-1, how much of the tile is covered by the room
-    isFull: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  coverage: number; // 0-1, how much of the tile is covered by the room
+  isFull: boolean;
 }
 
 export function calculateTiles(
-    roomVertices: Point[],
-    tileConfig: TileConfig,
-    gridConfig: GridConfig
+  roomVertices: Point[],
+  tileConfig: TileConfig,
+  gridConfig: GridConfig
 ): CalculationResult {
-    const tileSize = getTileSize(tileConfig.size, tileConfig.orientation);
-    const roomArea = calculatePolygonArea(roomVertices);
-    const tileArea = tileSize.width * tileSize.height;
+  const tileSize = getTileSize(tileConfig.size, tileConfig.orientation);
+  const roomArea = calculatePolygonArea(roomVertices);
+  const tileArea = tileSize.width * tileSize.height;
 
-    const tiles = generateTileGrid(roomVertices, tileSize, gridConfig);
-    const validTiles = filterTilesByCoverage(tiles, roomVertices);
+  const tiles = generateTileGrid(roomVertices, tileSize, gridConfig);
+  const validTiles = filterTilesByCoverage(tiles, roomVertices);
 
-    const fullTiles = validTiles.filter(tile => tile.isFull).length;
-    const partialTiles = validTiles.filter(tile => !tile.isFull).length;
-    const totalTiles = fullTiles + partialTiles;
-    const estimatedTotal = fullTiles + Math.ceil(partialTiles);
+  const fullTiles = validTiles.filter((tile) => tile.isFull).length;
+  const partialTiles = validTiles.filter((tile) => !tile.isFull).length;
+  const totalTiles = fullTiles + partialTiles;
+  const estimatedTotal = fullTiles + Math.ceil(partialTiles);
 
-    return {
-        totalTiles,
-        fullTiles,
-        partialTiles,
-        estimatedTotal,
-        area: roomArea,
-        tileArea,
-        wasteFactor: calculateWasteFactor(estimatedTotal * tileArea, roomArea)
-    };
+  return {
+    totalTiles,
+    fullTiles,
+    partialTiles,
+    estimatedTotal,
+    area: roomArea,
+    tileArea,
+    wasteFactor: calculateWasteFactor(estimatedTotal * tileArea, roomArea),
+  };
 }
 
 function getTileSize(size: string, orientation: number): Dimensions {
-    const baseSizes = {
-        '2x2': {width: 2, height: 2},
-        '2x4': {width: 2, height: 4}
-    };
+  const baseSizes = {
+    '2x2': { width: 2, height: 2 },
+    '2x4': { width: 2, height: 4 },
+  };
 
-    const baseSize = baseSizes[size as keyof typeof baseSizes];
+  const baseSize = baseSizes[size as keyof typeof baseSizes];
 
-    if (orientation === 90) {
-        return {width: baseSize.height, height: baseSize.width};
-    }
+  if (orientation === 90) {
+    return { width: baseSize.height, height: baseSize.width };
+  }
 
-    return baseSize;
+  return baseSize;
 }
 
 function generateTileGrid(
-    roomVertices: Point[],
-    tileSize: Dimensions,
-    gridConfig: GridConfig
+  roomVertices: Point[],
+  tileSize: Dimensions,
+  gridConfig: GridConfig
 ): TileCell[] {
-    const bounds = getBounds(roomVertices);
-    const tiles: TileCell[] = [];
+  const bounds = getBounds(roomVertices);
+  const tiles: TileCell[] = [];
 
-    // Extend bounds to ensure we cover the entire room
-    const startX = Math.floor((bounds.minX - tileSize.width) / tileSize.width) * tileSize.width;
-    const startY = Math.floor((bounds.minY - tileSize.height) / tileSize.height) * tileSize.height;
-    const endX = Math.ceil((bounds.maxX + tileSize.width) / tileSize.width) * tileSize.width;
-    const endY = Math.ceil((bounds.maxY + tileSize.height) / tileSize.height) * tileSize.height;
+  // Extend bounds to ensure we cover the entire room
+  const startX = Math.floor((bounds.minX - tileSize.width) / tileSize.width) * tileSize.width;
+  const startY = Math.floor((bounds.minY - tileSize.height) / tileSize.height) * tileSize.height;
+  const endX = Math.ceil((bounds.maxX + tileSize.width) / tileSize.width) * tileSize.width;
+  const endY = Math.ceil((bounds.maxY + tileSize.height) / tileSize.height) * tileSize.height;
 
-    // Apply grid offset
-    const offsetX = gridConfig.offsetX;
-    const offsetY = gridConfig.offsetY;
+  // Apply grid offset
+  const offsetX = gridConfig.offsetX;
+  const offsetY = gridConfig.offsetY;
 
-    for (let x = startX + offsetX; x < endX; x += tileSize.width) {
-        for (let y = startY + offsetY; y < endY; y += tileSize.height) {
-            tiles.push({
-                x,
-                y,
-                width: tileSize.width,
-                height: tileSize.height,
-                coverage: 0,
-                isFull: false
-            });
-        }
+  for (let x = startX + offsetX; x < endX; x += tileSize.width) {
+    for (let y = startY + offsetY; y < endY; y += tileSize.height) {
+      tiles.push({
+        x,
+        y,
+        width: tileSize.width,
+        height: tileSize.height,
+        coverage: 0,
+        isFull: false,
+      });
     }
+  }
 
-    return tiles;
+  return tiles;
 }
 
-function filterTilesByCoverage(
-    tiles: TileCell[],
-    roomVertices: Point[],
-): TileCell[] {
-    const validTiles: TileCell[] = [];
-    const minCoverage = 0.1; // Minimum coverage to include a tile
+function filterTilesByCoverage(tiles: TileCell[], roomVertices: Point[]): TileCell[] {
+  const validTiles: TileCell[] = [];
+  const minCoverage = 0.1; // Minimum coverage to include a tile
 
-    for (const tile of tiles) {
-        const coverage = calculateTileCoverage(tile, roomVertices);
+  for (const tile of tiles) {
+    const coverage = calculateTileCoverage(tile, roomVertices);
 
-        if (coverage >= minCoverage) {
-            tile.coverage = coverage;
-            tile.isFull = coverage >= 0.95; // Consider full if 95% or more is covered
-            validTiles.push(tile);
-        }
+    if (coverage >= minCoverage) {
+      tile.coverage = coverage;
+      tile.isFull = coverage >= 0.95; // Consider full if 95% or more is covered
+      validTiles.push(tile);
     }
+  }
 
-    return validTiles;
+  return validTiles;
 }
 
-function calculateTileCoverage(
-    tile: TileCell,
-    roomVertices: Point[],
-): number {
-    const sampleSize = 10; // Grid resolution for sampling
-    const totalSamples = sampleSize * sampleSize;
-    let coveredSamples = 0;
+function calculateTileCoverage(tile: TileCell, roomVertices: Point[]): number {
+  const sampleSize = 10; // Grid resolution for sampling
+  const totalSamples = sampleSize * sampleSize;
+  let coveredSamples = 0;
 
-    const stepX = tile.width / sampleSize;
-    const stepY = tile.height / sampleSize;
+  const stepX = tile.width / sampleSize;
+  const stepY = tile.height / sampleSize;
 
-    for (let i = 0; i < sampleSize; i++) {
-        for (let j = 0; j < sampleSize; j++) {
-            const samplePoint: Point = {
-                x: tile.x + (i + 0.5) * stepX,
-                y: tile.y + (j + 0.5) * stepY
-            };
+  for (let i = 0; i < sampleSize; i++) {
+    for (let j = 0; j < sampleSize; j++) {
+      const samplePoint: Point = {
+        x: tile.x + (i + 0.5) * stepX,
+        y: tile.y + (j + 0.5) * stepY,
+      };
 
-            if (isPointInRoom(samplePoint, roomVertices)) {
-                coveredSamples++;
-            }
-        }
+      if (isPointInRoom(samplePoint, roomVertices)) {
+        coveredSamples++;
+      }
     }
+  }
 
-    return coveredSamples / totalSamples;
+  return coveredSamples / totalSamples;
 }
 
 function isPointInRoom(point: Point, roomVertices: Point[]): boolean {
-    // Check if point is inside the room
-    return isPointInPolygon(point, roomVertices);
+  // Check if point is inside the room
+  return isPointInPolygon(point, roomVertices);
 }
 
-
 function getBounds(vertices: Point[]): { minX: number; maxX: number; minY: number; maxY: number } {
-    if (vertices.length === 0) {
-        return {minX: 0, maxX: 0, minY: 0, maxY: 0};
-    }
+  if (vertices.length === 0) {
+    return { minX: 0, maxX: 0, minY: 0, maxY: 0 };
+  }
 
-    let minX = vertices[0].x;
-    let maxX = vertices[0].x;
-    let minY = vertices[0].y;
-    let maxY = vertices[0].y;
+  let minX = vertices[0].x;
+  let maxX = vertices[0].x;
+  let minY = vertices[0].y;
+  let maxY = vertices[0].y;
 
-    for (const vertex of vertices) {
-        minX = Math.min(minX, vertex.x);
-        maxX = Math.max(maxX, vertex.x);
-        minY = Math.min(minY, vertex.y);
-        maxY = Math.max(maxY, vertex.y);
-    }
+  for (const vertex of vertices) {
+    minX = Math.min(minX, vertex.x);
+    maxX = Math.max(maxX, vertex.x);
+    minY = Math.min(minY, vertex.y);
+    maxY = Math.max(maxY, vertex.y);
+  }
 
-    return {minX, maxX, minY, maxY};
+  return { minX, maxX, minY, maxY };
 }
 
 function calculateWasteFactor(totalTileArea: number, roomArea: number): number {
-    if (roomArea === 0) return 0;
-    return Math.max(0, (totalTileArea - roomArea) / roomArea * 100);
+  if (roomArea === 0) return 0;
+  return Math.max(0, ((totalTileArea - roomArea) / roomArea) * 100);
 }
