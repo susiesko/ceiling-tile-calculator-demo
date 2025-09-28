@@ -93,13 +93,13 @@ describe('WallLengthAdjustments', () => {
       // For rectangles, updating Wall A should also update Wall C (opposite wall)
       // Check that both Wall A (index 0) and Wall C (index 2) were updated
       const calls = mockUpdateWall.mock.calls;
-      const wallACall = calls.find(call => call[0] === 0);
-      const wallCCall = calls.find(call => call[0] === 2);
+      const wallACall = calls.find((call) => call[0] === 0);
+      const wallCCall = calls.find((call) => call[0] === 2);
 
       expect(wallACall).toBeDefined();
-      expect(wallACall[1]).toEqual({ lengthInches: 144 }); // 12 feet = 144 inches
+      expect(wallACall?.[1]).toEqual({ lengthInches: 144 }); // 12 feet = 144 inches
       expect(wallCCall).toBeDefined();
-      expect(wallCCall[1]).toEqual({ lengthInches: 144 }); // Same length for opposite wall
+      expect(wallCCall?.[1]).toEqual({ lengthInches: 144 }); // Same length for opposite wall
     });
   });
 
@@ -202,14 +202,14 @@ describe('WallLengthAdjustments', () => {
       // For L-shapes, updating Wall A should also update Wall E (total width)
       // Check that both Wall A (index 0) and Wall E (index 4) were updated
       const calls = mockUpdateWall.mock.calls;
-      const wallACall = calls.find(call => call[0] === 0);
-      const wallECall = calls.find(call => call[0] === 4);
+      const wallACall = calls.find((call) => call[0] === 0);
+      const wallECall = calls.find((call) => call[0] === 4);
 
       expect(wallACall).toBeDefined();
-      expect(wallACall[1]).toEqual({ lengthInches: 144 }); // 12 feet = 144 inches
+      expect(wallACall?.[1]).toEqual({ lengthInches: 144 }); // 12 feet = 144 inches
       expect(wallECall).toBeDefined();
       // Wall E should be updated to width1 (144) + width2 (48) = 192 inches
-      expect(wallECall[1]).toEqual({ lengthInches: 192 }); // 12 + 4 = 16 feet = 192 inches
+      expect(wallECall?.[1]).toEqual({ lengthInches: 192 }); // 12 + 4 = 16 feet = 192 inches
     });
   });
 

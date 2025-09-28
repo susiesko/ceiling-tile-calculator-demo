@@ -68,10 +68,9 @@ export function moveRectangleWall(
 
   const isVertical = isWallVertical(wallIndex, vertices);
 
-  // Snap movement to 0.5 inch increments (1/24 feet)
-  const snapSize = 1 / 24; // 0.5 inches in feet
-  const snappedDeltaX = Math.round(deltaX / snapSize) * snapSize;
-  const snappedDeltaY = Math.round(deltaY / snapSize) * snapSize;
+  // Use deltas directly - no snapping
+  const snappedDeltaX = deltaX;
+  const snappedDeltaY = deltaY;
 
   // For rectangle: A=top, B=right, C=bottom, D=left
   if (isVertical) {
@@ -133,10 +132,9 @@ export function moveLShapeWall(
 
   const isVertical = isWallVertical(wallIndex, vertices);
 
-  // Snap movement to 0.5 inch increments (1/24 feet)
-  const snapSize = 1 / 24; // 0.5 inches in feet
-  const snappedDeltaX = Math.round(deltaX / snapSize) * snapSize;
-  const snappedDeltaY = Math.round(deltaY / snapSize) * snapSize;
+  // Use deltas directly - no snapping
+  const snappedDeltaX = deltaX;
+  const snappedDeltaY = deltaY;
 
   // For L-shape: A=top, B=right1, C=inner, D=right2, E=bottom, F=left
   const wallA = walls.find((w) => w.name === 'A');

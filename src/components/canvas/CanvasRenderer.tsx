@@ -27,6 +27,7 @@ export function CanvasRenderer({
 }: CanvasRendererProps) {
   const walls = useAppStore((state) => state.walls);
   const tileConfig = useAppStore((state) => state.tileConfig);
+  const gridConfig = useAppStore((state) => state.gridConfig);
   const units = useAppStore((state) => state.units);
   const updateWall = useAppStore((state) => state.updateWall);
   const internalCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -70,7 +71,7 @@ export function CanvasRenderer({
     // Clear canvas
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    // Draw grid fixed to canvas coordinates
+    // Draw fixed background grid for visual reference
     drawGrid(ctx, tileConfig);
 
     // Now apply transformations for the room content
@@ -202,6 +203,7 @@ export function CanvasRenderer({
 
       <div className="text-sm text-gray-600 space-y-1">
         <p>• Shift+click and drag to pan the view</p>
+        <p>• Drag wall labels to resize walls</p>
       </div>
     </div>
   );

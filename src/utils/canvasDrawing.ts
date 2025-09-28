@@ -5,6 +5,34 @@ export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 600;
 export const PIXELS_PER_FOOT = 40;
 
+// Grid snapping utilities
+export function snapToGrid(value: number, gridSize: number): number {
+  return Math.round(value / gridSize) * gridSize;
+}
+
+export function snapPointToGrid(point: Point, gridConfig: { snapGrid: number }): Point {
+  return {
+    x: snapToGrid(point.x, gridConfig.snapGrid),
+    y: snapToGrid(point.y, gridConfig.snapGrid),
+  };
+}
+
+// Directional snapping - only snap when moving toward a grid line
+export function snapToGridDirectional(currentValue: number, delta: number, gridSize: number): number {
+  const newValue = currentValue + delta;
+  const nearestGridLine = Math.round(currentValue / gridSize) * gridSize;
+  const distanceToGrid = Math.abs(currentValue - nearestGridLine);
+  const newDistanceToGrid = Math.abs(newValue - nearestGridLine);
+
+  // If we're moving closer to the grid line, snap to it when we get close enough
+  if (newDistanceToGrid < distanceToGrid && newDistanceToGrid < gridSize * 0.1) {
+    return nearestGridLine;
+  }
+
+  // Otherwise, allow free movement
+  return newValue;
+}
+
 export interface WallLabel {
   midpoint: Point;
   length: number;
@@ -17,7 +45,7 @@ export function drawGrid(ctx: CanvasRenderingContext2D, tileConfig: TileConfig) 
   ctx.strokeStyle = '#f3f4f6';
   ctx.lineWidth = 1;
 
-  // Calculate tile size in pixels - fixed to canvas
+  // Calculate tile size in pixels - fixed grid for visual reference
   let tileWidthPixels = 2 * PIXELS_PER_FOOT; // default 2x2
   let tileHeightPixels = 2 * PIXELS_PER_FOOT;
 
