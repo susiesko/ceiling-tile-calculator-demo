@@ -5,7 +5,7 @@
     "description": "2×2 ceiling tile with paw pattern",
     "width": 24,
     "height": 24,
-    "imageUrl": "/tiles/paw-2x2.png",
+    "imageUrl": "./tiles/paw-2x2.png",
     "category": "pattern"
   },
   {
@@ -14,7 +14,7 @@
     "description": "2×4 ceiling tile with paw pattern",
     "width": 24,
     "height": 48,
-    "imageUrl": "/tiles/paw-2x4.png",
+    "imageUrl": "./tiles/paw-2x4.png",
     "category": "pattern"
   }
 ]
