@@ -10,9 +10,6 @@ an "x".
 
 # BACKLOG
 
-- [ ] Choosing a tile should fill the room with that tile.  
-  - You will probably need to use clipping.
-
 # COMPLETED
 
 - [x] Put calculator in an accordion-esque layout where each step is in its own collapsable section. The accordion
@@ -79,3 +76,5 @@ an "x".
   - [x] Each tile should have a name, dimensions (width and height in inches),
   - [x] and an image URL, which points to the images in public/tiles.
   - [x] Only use what's currently in the public/tiles folder.
+- [x] Choosing a tile should fill the room with that tile.
+  - [x] Use clipping to ensure tiles only appear within room boundaries.

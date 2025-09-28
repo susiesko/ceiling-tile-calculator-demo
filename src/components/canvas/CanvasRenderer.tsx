@@ -38,6 +38,7 @@ export function CanvasRenderer({
   const [isDraggingWall, setIsDraggingWall] = useState(false);
   const [dragStart, setDragStart] = useState<Point | null>(null);
   const [draggedWallIndex, setDraggedWallIndex] = useState<number>(-1);
+  const [imageLoadCounter, setImageLoadCounter] = useState(0);
 
   const worldToScreen = useCallback(
     (point: Point): Point => {
@@ -90,7 +91,7 @@ export function CanvasRenderer({
     }
 
     ctx.restore();
-  }, [walls, tileConfig, pan, worldToScreen, isDraggingWall, units]);
+  }, [walls, tileConfig, pan, worldToScreen, isDraggingWall, units, imageLoadCounter]);
 
   const handleMouseDown = (event: React.MouseEvent) => {
     const rect = canvasRef.current?.getBoundingClientRect();
@@ -168,6 +169,18 @@ export function CanvasRenderer({
       y: -roomCenterY * PIXELS_PER_FOOT,
     });
   }, [walls]);
+
+  // Effect to handle tile image loading
+  useEffect(() => {
+    if (tileConfig.selectedTile) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        setImageLoadCounter(prev => prev + 1);
+      };
+      img.src = tileConfig.selectedTile.imageUrl;
+    }
+  }, [tileConfig.selectedTile]);
 
   useEffect(() => {
     renderCanvas();

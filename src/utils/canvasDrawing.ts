@@ -57,9 +57,6 @@ export function drawTiles(
 ) {
   if (vertices.length === 0) return;
 
-  ctx.strokeStyle = '#e5e7eb';
-  ctx.lineWidth = 1;
-
   // Calculate tile size in pixels - same as fixed grid
   let tileWidthPixels = 2 * PIXELS_PER_FOOT; // default 2x2
   let tileHeightPixels = 2 * PIXELS_PER_FOOT;
@@ -85,10 +82,97 @@ export function drawTiles(
   const endGridX = Math.ceil(bottomRightScreen.x / tileWidthPixels) * tileWidthPixels;
   const endGridY = Math.ceil(bottomRightScreen.y / tileHeightPixels) * tileHeightPixels;
 
-  // Draw tiles aligned with the fixed canvas grid
+  // Save the current context state
+  ctx.save();
+
+  // Create clipping path for the room shape
+  ctx.beginPath();
+  const screenVertices = vertices.map(worldToScreen);
+  if (screenVertices.length > 0) {
+    ctx.moveTo(screenVertices[0].x, screenVertices[0].y);
+    for (let i = 1; i < screenVertices.length; i++) {
+      ctx.lineTo(screenVertices[i].x, screenVertices[i].y);
+    }
+    ctx.closePath();
+    ctx.clip();
+  }
+
+  // Draw tiles with selected tile pattern if available
+  if (tileConfig.selectedTile) {
+    const tileImage = getTileImage(tileConfig.selectedTile.imageUrl);
+    if (tileImage && tileImage.complete) {
+      drawTilePatternSync(ctx, tileImage, startGridX, startGridY, endGridX, endGridY, tileWidthPixels, tileHeightPixels);
+    } else {
+      // Fall back to tile outlines while image loads
+      drawTileOutlines(ctx, startGridX, startGridY, endGridX, endGridY, tileWidthPixels, tileHeightPixels);
+    }
+  } else {
+    // Fall back to drawing tile outlines
+    drawTileOutlines(ctx, startGridX, startGridY, endGridX, endGridY, tileWidthPixels, tileHeightPixels);
+  }
+
+  // Restore the context state (removes clipping)
+  ctx.restore();
+}
+
+// Image cache for tile images
+const imageCache = new Map<string, HTMLImageElement>();
+
+function getTileImage(imageUrl: string): HTMLImageElement | null {
+  if (imageCache.has(imageUrl)) {
+    return imageCache.get(imageUrl)!;
+  }
+
+  // Create new image and start loading
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = imageUrl;
+  imageCache.set(imageUrl, img);
+
+  return img;
+}
+
+function drawTilePatternSync(
+  ctx: CanvasRenderingContext2D,
+  tileImage: HTMLImageElement,
+  startGridX: number,
+  startGridY: number,
+  endGridX: number,
+  endGridY: number,
+  tileWidthPixels: number,
+  tileHeightPixels: number
+) {
+  // Draw the tile pattern
   for (let x = startGridX; x < endGridX; x += tileWidthPixels) {
     for (let y = startGridY; y < endGridY; y += tileHeightPixels) {
       // Only draw tiles that are within canvas bounds
+      if (x >= 0 && y >= 0 && x < CANVAS_WIDTH && y < CANVAS_HEIGHT) {
+        // Draw the tile image
+        ctx.drawImage(tileImage, x, y, tileWidthPixels, tileHeightPixels);
+
+        // Draw subtle tile borders
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, tileWidthPixels, tileHeightPixels);
+      }
+    }
+  }
+}
+
+function drawTileOutlines(
+  ctx: CanvasRenderingContext2D,
+  startGridX: number,
+  startGridY: number,
+  endGridX: number,
+  endGridY: number,
+  tileWidthPixels: number,
+  tileHeightPixels: number
+) {
+  ctx.strokeStyle = '#e5e7eb';
+  ctx.lineWidth = 1;
+
+  for (let x = startGridX; x < endGridX; x += tileWidthPixels) {
+    for (let y = startGridY; y < endGridY; y += tileHeightPixels) {
       if (x >= 0 && y >= 0 && x < CANVAS_WIDTH && y < CANVAS_HEIGHT) {
         ctx.strokeRect(x, y, tileWidthPixels, tileHeightPixels);
       }
