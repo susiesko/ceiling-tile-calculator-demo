@@ -10,10 +10,8 @@ an "x".
 
 # BACKLOG
 
-- [ ] ENHANCEMENT: Add a tile picker step.
-  - [ ] Available tiles should be stored in a JSON file.
-  - [ ] Each tile should have a name, dimensions (width and height in inches),
-  - [ ] and an image URL, which points to the images in public/tiles.
+- [ ] Choosing a tile should fill the room with that tile.  
+  - You will probably need to use clipping.
 
 # COMPLETED
 
@@ -75,3 +73,9 @@ an "x".
   - [x] The walls should move at the same rate as the mouse cursor.
   - [x] The mouse cursor must be hovering the label to start dragging the wall, but moving the mouse cursor off the
         the label won't stop the wall from moving until the mouse button is released.
+- [x] ENHANCEMENT: Add a tile picker step.
+  - [x] The "choose tile" step is its own step and should be the sixth step. Only show the tiles that match the size.
+  - [x] Available tiles should be stored in a JSON file.
+  - [x] Each tile should have a name, dimensions (width and height in inches),
+  - [x] and an image URL, which points to the images in public/tiles.
+  - [x] Only use what's currently in the public/tiles folder.

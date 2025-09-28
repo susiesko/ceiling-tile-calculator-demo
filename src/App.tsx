@@ -3,6 +3,7 @@ import { useAppStore } from './store/appStore';
 import { ShapeConfig } from './components/shapes/ShapeConfig';
 import { CanvasRenderer } from './components/canvas/CanvasRenderer';
 import { TileControls } from './components/TileControls';
+import { TilePicker } from './components/TilePicker';
 import { CalculationResults } from './components/CalculationResults';
 import { AccordionSection } from './components/AccordionSection';
 import { WallLengthAdjustments } from './components/WallLengthAdjustments';
@@ -15,10 +16,13 @@ function App() {
     step2: false,
     step3: false,
     step4: false,
+    step5: false,
+    step6: false,
   });
 
   const walls = useAppStore((state) => state.walls);
   const tileConfig = useAppStore((state) => state.tileConfig);
+  const updateSelectedTile = useAppStore((state) => state.updateSelectedTile);
   const resetState = useAppStore((state) => state.resetState);
 
   const validation = validateWalls(walls);
@@ -32,6 +36,8 @@ function App() {
         step2: false,
         step3: false,
         step4: false,
+        step5: false,
+        step6: false,
       };
       // If the clicked section was closed, open it; if it was open, leave all closed
       return isCurrentlyOpen ? allClosed : { ...allClosed, [section]: true };
@@ -143,17 +149,31 @@ function App() {
               <TileOrientationControls />
             </AccordionSection>
 
-            {/* Step 4: Adjust wall lengths */}
+            {/* Step 5: Adjust wall lengths */}
             <AccordionSection
               title="Adjust wall lengths"
-              stepNumber={4}
-              isOpen={openSections.step4}
-              onToggle={() => toggleSection('step4')}
+              stepNumber={5}
+              isOpen={openSections.step5}
+              onToggle={() => toggleSection('step5')}
             >
               <WallLengthAdjustments />
               <div className="text-sm text-gray-600 mt-4">
                 You can also drag the wall labels on the canvas to adjust dimensions.
               </div>
+            </AccordionSection>
+
+            {/* Step 6: Choose tile */}
+            <AccordionSection
+              title="Choose tile"
+              stepNumber={6}
+              isOpen={openSections.step6}
+              onToggle={() => toggleSection('step6')}
+            >
+              <TilePicker
+                selectedTileSize={tileConfig.size}
+                selectedTileId={tileConfig.selectedTile?.id}
+                onTileSelect={updateSelectedTile}
+              />
             </AccordionSection>
 
             {/* Results */}

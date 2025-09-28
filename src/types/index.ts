@@ -17,6 +17,16 @@ export enum TileOrientation {
   Vertical = 90,
 }
 
+export interface TileDefinition {
+  id: string;
+  name: string;
+  description: string;
+  width: number; // width in inches
+  height: number; // height in inches
+  imageUrl: string;
+  category: string;
+}
+
 export type ShapeType = 'rectangle' | 'l-shape';
 
 export interface Wall {
@@ -29,6 +39,7 @@ export interface Wall {
 export interface TileConfig {
   size: TileSize;
   orientation: TileOrientation;
+  selectedTile?: TileDefinition;
 }
 
 export interface GridConfig {

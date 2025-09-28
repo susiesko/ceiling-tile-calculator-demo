@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AppState, GridConfig, TileConfig, Wall } from '../types';
+import { AppState, GridConfig, TileConfig, TileDefinition, Wall } from '../types';
 import { generateWallsFromRectangle } from '../utils/wallUtils';
 
 const defaultAppState: AppState = {
@@ -31,6 +31,7 @@ interface AppStore extends AppState {
   updateWalls: (walls: Wall[]) => void;
   updateWall: (wallIndex: number, wall: Partial<Wall>) => void;
   updateTileConfig: (tileConfig: Partial<TileConfig>) => void;
+  updateSelectedTile: (tile: TileDefinition) => void;
   updateGridConfig: (gridConfig: Partial<GridConfig>) => void;
   resetState: () => void;
 }
@@ -57,6 +58,12 @@ export const useAppStore = create<AppStore>()(
       updateTileConfig: (tileConfig: Partial<TileConfig>) => {
         set((state) => ({
           tileConfig: { ...state.tileConfig, ...tileConfig },
+        }));
+      },
+
+      updateSelectedTile: (tile: TileDefinition) => {
+        set((state) => ({
+          tileConfig: { ...state.tileConfig, selectedTile: tile },
         }));
       },
 
