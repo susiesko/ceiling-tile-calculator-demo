@@ -21,7 +21,7 @@ export function TilePicker({
   useEffect(() => {
     const loadTiles = async () => {
       try {
-        const response = await fetch('/tiles.json');
+        const response = await fetch('./tiles.json');
         if (!response.ok) {
           throw new Error('Failed to load tiles');
         }

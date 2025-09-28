@@ -208,7 +208,7 @@ describe('TilePicker', () => {
     );
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/tiles.json');
+      expect(mockFetch).toHaveBeenCalledWith('./tiles.json');
     });
   });
 
