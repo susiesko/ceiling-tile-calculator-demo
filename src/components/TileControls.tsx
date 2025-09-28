@@ -35,7 +35,7 @@ export function TileControls({ className = '' }: TileControlsProps) {
           {(['2x2', '2x4'] as TileSize[]).map((size) => (
             <div
               key={size}
-              onClick={() => updateTileConfig({ size })}
+              onClick={() => updateTileConfig({ size, selectedTile: undefined })}
               className={`cursor-pointer group p-4 rounded-2xl border-2 transition-all duration-300 hover:scale-105 hover:shadow-soft ${
                 tileConfig.size === size
                   ? 'border-primary-300 bg-primary-50/50'

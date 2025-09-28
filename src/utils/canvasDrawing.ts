@@ -129,7 +129,7 @@ export function drawTiles(
   if (tileConfig.selectedTile) {
     const tileImage = getTileImage(tileConfig.selectedTile.imageUrl);
     if (tileImage && tileImage.complete) {
-      drawTilePatternSync(ctx, tileImage, startGridX, startGridY, endGridX, endGridY, tileWidthPixels, tileHeightPixels);
+      drawTilePatternSync(ctx, tileImage, startGridX, startGridY, endGridX, endGridY, tileWidthPixels, tileHeightPixels, tileConfig);
     } else {
       // Fall back to tile outlines while image loads
       drawTileOutlines(ctx, startGridX, startGridY, endGridX, endGridY, tileWidthPixels, tileHeightPixels);
@@ -168,15 +168,33 @@ function drawTilePatternSync(
   endGridX: number,
   endGridY: number,
   tileWidthPixels: number,
-  tileHeightPixels: number
+  tileHeightPixels: number,
+  tileConfig: TileConfig
 ) {
   // Draw the tile pattern
   for (let x = startGridX; x < endGridX; x += tileWidthPixels) {
     for (let y = startGridY; y < endGridY; y += tileHeightPixels) {
       // Only draw tiles that are within canvas bounds
       if (x >= 0 && y >= 0 && x < CANVAS_WIDTH && y < CANVAS_HEIGHT) {
-        // Draw the tile image
-        ctx.drawImage(tileImage, x, y, tileWidthPixels, tileHeightPixels);
+        // For 2x4 tiles, we need to rotate the image when orientation is horizontal
+        if (tileConfig.size === '2x4' && tileConfig.orientation === TileOrientation.Horizontal) {
+          ctx.save();
+
+          // Translate to center of tile
+          ctx.translate(x + tileWidthPixels / 2, y + tileHeightPixels / 2);
+
+          // Rotate 90 degrees clockwise to make vertical image horizontal
+          ctx.rotate(Math.PI / 2);
+
+          // Draw image centered on the rotated coordinate system
+          // Note: we swap width/height because we're rotating
+          ctx.drawImage(tileImage, -tileHeightPixels / 2, -tileWidthPixels / 2, tileHeightPixels, tileWidthPixels);
+
+          ctx.restore();
+        } else {
+          // Draw the tile image normally
+          ctx.drawImage(tileImage, x, y, tileWidthPixels, tileHeightPixels);
+        }
 
         // Draw subtle tile borders
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
