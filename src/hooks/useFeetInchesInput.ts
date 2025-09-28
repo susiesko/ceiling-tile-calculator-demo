@@ -1,8 +1,116 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import Decimal from 'decimal.js';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAppStore } from '../store/appStore';
+import { Wall } from '../types';
 
 function roundToNearestHalf(value: number): number {
   return Math.round(value * 2) / 2;
+}
+
+function updateRelatedWalls(
+  wallIndex: number,
+  newLengthInches: number,
+  walls: Wall[],
+  updateWall: (wallIndex: number, wall: Partial<Wall>) => void
+) {
+  if (walls.length === 4) {
+    // Rectangle: update opposite walls
+    const wall = walls[wallIndex];
+    if (!wall) return;
+
+    // For rectangle: A=top, B=right, C=bottom, D=left
+    switch (wall.name) {
+      case 'A': // Top wall changed → update bottom wall (C)
+        const wallC = walls.find(w => w.name === 'C');
+        if (wallC) {
+          updateWall(wallC.wallIndex, { lengthInches: newLengthInches });
+        }
+        break;
+      case 'B': // Right wall changed → update left wall (D)
+        const wallD = walls.find(w => w.name === 'D');
+        if (wallD) {
+          updateWall(wallD.wallIndex, { lengthInches: newLengthInches });
+        }
+        break;
+      case 'C': // Bottom wall changed → update top wall (A)
+        const wallA = walls.find(w => w.name === 'A');
+        if (wallA) {
+          updateWall(wallA.wallIndex, { lengthInches: newLengthInches });
+        }
+        break;
+      case 'D': // Left wall changed → update right wall (B)
+        const wallB = walls.find(w => w.name === 'B');
+        if (wallB) {
+          updateWall(wallB.wallIndex, { lengthInches: newLengthInches });
+        }
+        break;
+    }
+  } else if (walls.length === 6) {
+    // L-shape: update related walls based on complex relationships
+    const wall = walls[wallIndex];
+    if (!wall) return;
+
+    const wallA = walls.find(w => w.name === 'A');
+    const wallB = walls.find(w => w.name === 'B');
+    const wallC = walls.find(w => w.name === 'C');
+    const wallD = walls.find(w => w.name === 'D');
+    const wallE = walls.find(w => w.name === 'E');
+    const wallF = walls.find(w => w.name === 'F');
+
+    switch (wall.name) {
+      case 'A': // Top wall changed → update total width (E)
+        if (wallC && wallE) {
+          const width2 = wallC.lengthInches;
+          updateWall(wallE.wallIndex, { lengthInches: newLengthInches + width2 });
+        }
+        break;
+      case 'B': // Right wall 1 changed → update total height (F)
+        if (wallD && wallF) {
+          const height2 = wallD.lengthInches;
+          updateWall(wallF.wallIndex, { lengthInches: newLengthInches + height2 });
+        }
+        break;
+      case 'C': // Inner wall changed → update total width (E)
+        if (wallA && wallE) {
+          const width1 = wallA.lengthInches;
+          updateWall(wallE.wallIndex, { lengthInches: width1 + newLengthInches });
+        }
+        break;
+      case 'D': // Right wall 2 changed → update total height (F)
+        if (wallB && wallF) {
+          const height1 = wallB.lengthInches;
+          updateWall(wallF.wallIndex, { lengthInches: height1 + newLengthInches });
+        }
+        break;
+      case 'E': // Total width changed → maintain ratio for A and C
+        if (wallA && wallC) {
+          const currentWidth1 = wallA.lengthInches;
+          const currentWidth2 = wallC.lengthInches;
+          const totalCurrent = currentWidth1 + currentWidth2;
+          if (totalCurrent > 0) {
+            const ratio = currentWidth1 / totalCurrent;
+            const newWidth1 = Math.max(6, newLengthInches * ratio); // Min 6 inches
+            const newWidth2 = Math.max(6, newLengthInches - newWidth1);
+            updateWall(wallA.wallIndex, { lengthInches: newWidth1 });
+            updateWall(wallC.wallIndex, { lengthInches: newWidth2 });
+          }
+        }
+        break;
+      case 'F': // Total height changed → maintain ratio for B and D
+        if (wallB && wallD) {
+          const currentHeight1 = wallB.lengthInches;
+          const currentHeight2 = wallD.lengthInches;
+          const totalCurrent = currentHeight1 + currentHeight2;
+          if (totalCurrent > 0) {
+            const ratio = currentHeight1 / totalCurrent;
+            const newHeight1 = Math.max(6, newLengthInches * ratio); // Min 6 inches
+            const newHeight2 = Math.max(6, newLengthInches - newHeight1);
+            updateWall(wallB.wallIndex, { lengthInches: newHeight1 });
+            updateWall(wallD.wallIndex, { lengthInches: newHeight2 });
+          }
+        }
+        break;
+    }
+  }
 }
 
 export interface FeetInchesInputReturn {
@@ -13,115 +121,71 @@ export interface FeetInchesInputReturn {
   handleChange: () => void;
 }
 
-export function useFeetInchesInput(
-  currentValue: number,
-  onValueChange: (value: number) => void
-): FeetInchesInputReturn {
+export function useFeetInchesInput(wallIndex: number): FeetInchesInputReturn {
   const [feet, setFeet] = useState('');
   const [inches, setInches] = useState('');
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isUpdatingFromProp = useRef(false);
-  const isUserTyping = useRef(false);
-  const lastProcessedValue = useRef<number | null>(null);
+  const isUpdatingFromStore = useRef(false);
 
-  // Convert current value to feet and inches when it changes
+  const walls = useAppStore((state) => state.walls);
+  const updateWall = useAppStore((state) => state.updateWall);
+  const currentWall = useMemo(() => walls[wallIndex], [walls, wallIndex]);
+
+  // Convert inches to feet + inches for display
   useEffect(() => {
-    // Don't update inputs if user is actively typing
-    if (isUserTyping.current) return;
+    if (isUpdatingFromStore.current) return;
 
-    // Don't update if this is very close to the last value we set (within floating point precision)
-    if (
-      lastProcessedValue.current !== null &&
-      Math.abs(lastProcessedValue.current - currentValue) < 0.0001
-    )
-      return;
+    const totalInches = currentWall?.lengthInches || 0;
+    const feetPart = Math.floor(totalInches / 12);
+    const inchesPart = roundToNearestHalf(totalInches % 12);
 
-    isUpdatingFromProp.current = true;
-    const totalInches = new Decimal(currentValue).times(12);
-    const feetPart = totalInches.dividedBy(12).floor().toNumber();
-    const exactInchesPart = totalInches.modulo(12).toNumber();
+    isUpdatingFromStore.current = true;
+    setFeet(feetPart.toString());
+    setInches(inchesPart % 1 === 0 ? inchesPart.toString() : inchesPart.toFixed(1));
+    isUpdatingFromStore.current = false;
+  }, [currentWall]);
 
-    // Round the inches part when displaying from external updates
-    const roundedInchesPart = roundToNearestHalf(exactInchesPart);
+  const updateTotalInches = useCallback(() => {
+    // Get the current values from state at execution time
+    setFeet(currentFeet => {
+      setInches(currentInches => {
+        const feetValue = parseFloat(currentFeet) || 0;
+        const inchesValue = parseFloat(currentInches) || 0;
+        const roundedInches = roundToNearestHalf(inchesValue);
+        const totalInches = feetValue * 12 + roundedInches;
 
-    setFeet(() => feetPart.toString());
-    setInches(() =>
-      roundedInchesPart % 1 === 0 ? roundedInchesPart.toString() : roundedInchesPart.toFixed(1)
-    );
-    isUpdatingFromProp.current = false;
-  }, [currentValue]);
+        // Update display with rounded inches
+        const roundedInchesDisplay = roundedInches % 1 === 0 ? roundedInches.toString() : roundedInches.toFixed(1);
 
-  const handleChange = useCallback(() => {
-    // Round the inches value to nearest half
-    const inchesValue = parseFloat(inches) || 0;
-    const roundedInches = roundToNearestHalf(inchesValue);
+        // Update the wall and handle related wall updates
+        updateWall(wallIndex, { lengthInches: totalInches });
+        updateRelatedWalls(wallIndex, totalInches, walls, updateWall);
 
-    // Update display with rounded value
-    const displayInches =
-      roundedInches % 1 === 0 ? roundedInches.toString() : roundedInches.toFixed(1);
-    setInches(displayInches);
+        // Return the rounded inches to update the display
+        return roundedInchesDisplay;
+      });
 
-    isUserTyping.current = false; // User finished typing
-
-    // Calculate with rounded value using high precision
-    const feetValue = parseFloat(feet) || 0;
-    const totalFeet = new Decimal(feetValue)
-      .plus(new Decimal(roundedInches).dividedBy(12))
-      .toNumber();
-
-    lastProcessedValue.current = totalFeet;
-    onValueChange(totalFeet);
-  }, [feet, inches, onValueChange]);
+      // Return the feet value unchanged
+      return currentFeet;
+    });
+  }, [wallIndex, updateWall, walls]);
 
   const debouncedUpdate = useCallback(() => {
-    if (isUpdatingFromProp.current) return;
-
-    // Clear existing timeout
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
     }
+    debounceTimeoutRef.current = setTimeout(updateTotalInches, 1000);
+  }, [updateTotalInches]);
 
-    // Set new timeout for 1 second
-    debounceTimeoutRef.current = setTimeout(() => {
-      // Round the inches value when debounce fires
-      const inchesValue = parseFloat(inches) || 0;
-      const roundedInches = roundToNearestHalf(inchesValue);
+  const handleSetFeet = useCallback((value: string) => {
+    setFeet(value);
+    debouncedUpdate();
+  }, [debouncedUpdate]);
 
-      // Update display with rounded value
-      const displayInches =
-        roundedInches % 1 === 0 ? roundedInches.toString() : roundedInches.toFixed(1);
-      setInches(displayInches);
-
-      isUserTyping.current = false; // User stopped typing
-
-      // Calculate with rounded value (use roundedInches, not current state)
-      const feetValue = parseFloat(feet) || 0;
-      const totalFeet = new Decimal(feetValue)
-        .plus(new Decimal(roundedInches).dividedBy(12))
-        .toNumber();
-
-      lastProcessedValue.current = totalFeet;
-      onValueChange(totalFeet);
-    }, 1000);
-  }, [feet, inches, onValueChange]);
-
-  const setFeetWithDebounce = useCallback(
-    (value: string) => {
-      isUserTyping.current = true;
-      setFeet(value);
-      debouncedUpdate();
-    },
-    [debouncedUpdate]
-  );
-
-  const setInchesWithDebounce = useCallback(
-    (value: string) => {
-      isUserTyping.current = true;
-      setInches(value);
-      debouncedUpdate();
-    },
-    [debouncedUpdate]
-  );
+  const handleSetInches = useCallback((value: string) => {
+    setInches(value);
+    debouncedUpdate();
+  }, [debouncedUpdate]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -135,8 +199,8 @@ export function useFeetInchesInput(
   return {
     feet,
     inches,
-    setFeet: setFeetWithDebounce,
-    setInches: setInchesWithDebounce,
-    handleChange,
+    setFeet: handleSetFeet,
+    setInches: handleSetInches,
+    handleChange: updateTotalInches,
   };
 }
