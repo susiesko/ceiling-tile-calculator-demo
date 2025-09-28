@@ -32,8 +32,10 @@ describe('WallLengthAdjustments', () => {
       render(<WallLengthAdjustments />);
 
       expect(screen.getByText('Rectangle Dimensions')).toBeInTheDocument();
-      expect(screen.getByText('Width (Walls A & C)')).toBeInTheDocument();
-      expect(screen.getByText('Height (Walls B & D)')).toBeInTheDocument();
+      expect(screen.getByText('Wall A')).toBeInTheDocument();
+      expect(screen.getByText('Wall B')).toBeInTheDocument();
+      expect(screen.getByText('Wall C')).toBeInTheDocument();
+      expect(screen.getByText('Wall D')).toBeInTheDocument();
     });
 
     it('should display current dimensions', () => {
@@ -50,13 +52,13 @@ describe('WallLengthAdjustments', () => {
 
       render(<WallLengthAdjustments />);
 
-      // Check width inputs - find input with value 10
-      const widthFeetInput = screen.getByDisplayValue('10');
-      expect(widthFeetInput).toHaveValue(10);
+      // Check width inputs - find all inputs with value 10 (walls A and C)
+      const widthFeetInputs = screen.getAllByDisplayValue('10');
+      expect(widthFeetInputs).toHaveLength(2); // A and C walls
 
-      // Check height inputs - find input with value 8
-      const heightFeetInput = screen.getByDisplayValue('8');
-      expect(heightFeetInput).toHaveValue(8);
+      // Check height inputs - find all inputs with value 8 (walls B and D)
+      const heightFeetInputs = screen.getAllByDisplayValue('8');
+      expect(heightFeetInputs).toHaveLength(2); // B and D walls
     });
 
     it('should call updateWall when width changes', async () => {
@@ -74,14 +76,16 @@ describe('WallLengthAdjustments', () => {
 
       render(<WallLengthAdjustments />);
 
-      const widthFeetInput = screen.getByDisplayValue('10');
+      // Get all width inputs (value 10) and pick the first one (Wall A)
+      const widthFeetInputs = screen.getAllByDisplayValue('10');
+      const wallAFeetInput = widthFeetInputs[0]; // First one should be Wall A
 
       // Change width from 10 to 12
-      await user.clear(widthFeetInput);
-      await user.type(widthFeetInput, '12');
+      await user.clear(wallAFeetInput);
+      await user.type(wallAFeetInput, '12');
 
       // Trigger the onBlur event to save the change
-      fireEvent.blur(widthFeetInput);
+      fireEvent.blur(wallAFeetInput);
 
       // Check that updateWall was called for the width change
       expect(mockUpdateWall).toHaveBeenCalled();
@@ -111,6 +115,8 @@ describe('WallLengthAdjustments', () => {
       expect(screen.getByText('Wall B')).toBeInTheDocument();
       expect(screen.getByText('Wall C')).toBeInTheDocument();
       expect(screen.getByText('Wall D')).toBeInTheDocument();
+      expect(screen.getByText('Wall E')).toBeInTheDocument();
+      expect(screen.getByText('Wall F')).toBeInTheDocument();
     });
 
     it('should display current L-shape dimensions', () => {
@@ -206,7 +212,9 @@ describe('WallLengthAdjustments', () => {
 
       render(<WallLengthAdjustments />);
 
-      const widthFeetInput = screen.getByDisplayValue('10');
+      // Get the first width input (Wall A)
+      const widthFeetInputs = screen.getAllByDisplayValue('10');
+      const widthFeetInput = widthFeetInputs[0];
 
       // Clear the input
       await user.clear(widthFeetInput);
