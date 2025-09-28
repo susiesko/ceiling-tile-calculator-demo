@@ -15,7 +15,7 @@ export function useAppState() {
       // Update the store with new calculation
       useAppStore.setState({ calculation });
     }
-  }, [store.walls, store.tileConfig, store.gridConfig]);
+  }, [store.walls, store.tileConfig, store.gridConfig, store.tileConfig.selectedTile]);
 
   return {
     state: {

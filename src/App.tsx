@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAppStore } from './store/appStore';
+import { useAppState } from './hooks/useAppState';
 import { ShapeConfig } from './components/shapes/ShapeConfig';
 import { CanvasRenderer } from './components/canvas/CanvasRenderer';
 import { TileControls } from './components/TileControls';
@@ -11,6 +12,9 @@ import { TileOrientationControls } from './components/TileOrientationControls';
 import { validateWalls } from './utils/validation';
 
 function App() {
+  // Initialize the app state hook to trigger calculations
+  useAppState();
+
   const [openSections, setOpenSections] = useState({
     step1: true,
     step2: false,
