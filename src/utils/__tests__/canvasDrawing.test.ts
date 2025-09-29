@@ -14,6 +14,8 @@ const mockContext = {
   strokeRect: vi.fn(),
   drawImage: vi.fn(),
   stroke: vi.fn(),
+  translate: vi.fn(),
+  rotate: vi.fn(),
   strokeStyle: '',
   lineWidth: 0,
 } as unknown as CanvasRenderingContext2D;
@@ -188,6 +190,109 @@ describe('Canvas Drawing - Tile Rendering', () => {
 
     // Test vertical orientation
     drawTiles(mockContext, vertices, verticalConfig, mockWorldToScreen, mockGetRoomBounds);
+    expect(mockContext.strokeRect).toHaveBeenCalled();
+  });
+
+  it('should rotate 2x4 tile images when in horizontal orientation', () => {
+    const vertices: Point[] = [
+      { x: 0, y: 0 },
+      { x: 8, y: 0 },
+      { x: 8, y: 4 },
+      { x: 0, y: 4 },
+    ];
+
+    const horizontalConfig: TileConfig = {
+      size: '2x4',
+      orientation: TileOrientation.Horizontal,
+      selectedTile: {
+        id: 'test-2x4',
+        name: 'Test 2x4 Tile',
+        description: 'Test 2x4 tile description',
+        width: 24,
+        height: 48,
+        imageUrl: '/tiles/test-2x4.png',
+        category: 'test',
+      },
+    };
+
+    // Mock image as loaded
+    mockImage.complete = true;
+
+    drawTiles(mockContext, vertices, horizontalConfig, mockWorldToScreen, mockGetRoomBounds);
+
+    // Should use canvas transformations for rotation
+    expect(mockContext.save).toHaveBeenCalled();
+    expect(mockContext.translate).toHaveBeenCalled();
+    expect(mockContext.rotate).toHaveBeenCalledWith(Math.PI / 2); // 90 degrees clockwise
+    expect(mockContext.restore).toHaveBeenCalled();
+    expect(mockContext.drawImage).toHaveBeenCalled();
+  });
+
+  it('should not rotate 2x4 tile images when in vertical orientation', () => {
+    const vertices: Point[] = [
+      { x: 0, y: 0 },
+      { x: 4, y: 0 },
+      { x: 4, y: 8 },
+      { x: 0, y: 8 },
+    ];
+
+    const verticalConfig: TileConfig = {
+      size: '2x4',
+      orientation: TileOrientation.Vertical,
+      selectedTile: {
+        id: 'test-2x4',
+        name: 'Test 2x4 Tile',
+        description: 'Test 2x4 tile description',
+        width: 24,
+        height: 48,
+        imageUrl: '/tiles/test-2x4.png',
+        category: 'test',
+      },
+    };
+
+    // Mock image as loaded
+    mockImage.complete = true;
+
+    drawTiles(mockContext, vertices, verticalConfig, mockWorldToScreen, mockGetRoomBounds);
+
+    // Should draw image normally without extra transformations
+    expect(mockContext.translate).not.toHaveBeenCalled();
+    expect(mockContext.rotate).not.toHaveBeenCalled();
+    expect(mockContext.drawImage).toHaveBeenCalled();
+    expect(mockContext.strokeRect).toHaveBeenCalled(); // Should still draw borders
+  });
+
+  it('should not rotate 2x2 tile images regardless of orientation', () => {
+    const vertices: Point[] = [
+      { x: 0, y: 0 },
+      { x: 4, y: 0 },
+      { x: 4, y: 4 },
+      { x: 0, y: 4 },
+    ];
+
+    const config2x2: TileConfig = {
+      size: '2x2',
+      orientation: TileOrientation.Horizontal, // Orientation shouldn't matter for 2x2
+      selectedTile: {
+        id: 'test-2x2',
+        name: 'Test 2x2 Tile',
+        description: 'Test 2x2 tile description',
+        width: 24,
+        height: 24,
+        imageUrl: '/tiles/test-2x2.png',
+        category: 'test',
+      },
+    };
+
+    // Mock image as loaded
+    mockImage.complete = true;
+
+    drawTiles(mockContext, vertices, config2x2, mockWorldToScreen, mockGetRoomBounds);
+
+    // Should draw image normally without rotation transformations
+    expect(mockContext.translate).not.toHaveBeenCalled();
+    expect(mockContext.rotate).not.toHaveBeenCalled();
+    expect(mockContext.drawImage).toHaveBeenCalled();
     expect(mockContext.strokeRect).toHaveBeenCalled();
   });
 

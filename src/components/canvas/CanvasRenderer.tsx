@@ -40,6 +40,7 @@ export function CanvasRenderer({
   const [dragStart, setDragStart] = useState<Point | null>(null);
   const [draggedWallIndex, setDraggedWallIndex] = useState<number>(-1);
   const [imageLoadCounter, setImageLoadCounter] = useState(0);
+  const [canvasSize, setCanvasSize] = useState({ width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
 
   const worldToScreen = useCallback(
     (point: Point): Point => {
@@ -94,27 +95,57 @@ export function CanvasRenderer({
     ctx.restore();
   }, [walls, tileConfig, pan, worldToScreen, isDraggingWall, units, imageLoadCounter]);
 
-  const handleMouseDown = (event: React.MouseEvent) => {
+  const getEventPosition = (event: React.MouseEvent | React.TouchEvent) => {
     const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    if (!rect) return null;
 
-    const mousePos = {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
+    let clientX: number, clientY: number;
+
+    if ('touches' in event) {
+      // Touch event
+      const touch = event.touches[0] || event.changedTouches[0];
+      clientX = touch.clientX;
+      clientY = touch.clientY;
+    } else {
+      // Mouse event
+      clientX = event.clientX;
+      clientY = event.clientY;
+    }
+
+    // Scale coordinates to account for canvas scaling
+    const scaleX = CANVAS_WIDTH / rect.width;
+    const scaleY = CANVAS_HEIGHT / rect.height;
+
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
     };
+  };
 
-    if (event.shiftKey) {
+  const handleStart = (event: React.MouseEvent | React.TouchEvent) => {
+    const pos = getEventPosition(event);
+    if (!pos) return;
+
+    // Prevent default touch behaviors like scrolling
+    if ('touches' in event) {
+      event.preventDefault();
+    }
+
+    const isShiftClick = 'shiftKey' in event && event.shiftKey;
+    const isTwoFingerTouch = 'touches' in event && event.touches.length >= 2;
+
+    if (isShiftClick || isTwoFingerTouch) {
       setIsPanning(true);
-      setLastPan(mousePos);
+      setLastPan(pos);
       return;
     }
 
-    // Check if clicking on a wall label
-    const clickedWall = findWallLabelAt(mousePos, wallLabels, worldToScreen);
+    // Check if clicking/touching on a wall label
+    const clickedWall = findWallLabelAt(pos, wallLabels, worldToScreen);
     if (clickedWall !== -1) {
       setIsDraggingWall(true);
       setDraggedWallIndex(clickedWall);
-      setDragStart(screenToWorld(mousePos));
+      setDragStart(screenToWorld(pos));
     } else {
       setIsDraggingWall(false);
       setDraggedWallIndex(-1);
@@ -122,23 +153,27 @@ export function CanvasRenderer({
     }
   };
 
-  const handleMouseMove = (event: React.MouseEvent) => {
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
+  const handleMouseDown = (event: React.MouseEvent) => {
+    handleStart(event);
+  };
 
-    const mousePos = {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
-    };
+  const handleMove = (event: React.MouseEvent | React.TouchEvent) => {
+    const pos = getEventPosition(event);
+    if (!pos) return;
+
+    // Prevent default touch behaviors like scrolling
+    if ('touches' in event) {
+      event.preventDefault();
+    }
 
     if (isPanning) {
-      const deltaX = mousePos.x - lastPan.x;
-      const deltaY = mousePos.y - lastPan.y;
+      const deltaX = pos.x - lastPan.x;
+      const deltaY = pos.y - lastPan.y;
       setPan((prev) => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
-      setLastPan(mousePos);
+      setLastPan(pos);
     } else if (isDraggingWall && dragStart && draggedWallIndex !== -1) {
       // Handle wall dragging
-      const currentWorldPos = screenToWorld(mousePos);
+      const currentWorldPos = screenToWorld(pos);
       const deltaX = currentWorldPos.x - dragStart.x;
       const deltaY = currentWorldPos.y - dragStart.y;
 
@@ -148,11 +183,31 @@ export function CanvasRenderer({
     }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseMove = (event: React.MouseEvent) => {
+    handleMove(event);
+  };
+
+  const handleEnd = () => {
     setIsPanning(false);
     setIsDraggingWall(false);
     setDragStart(null);
     setDraggedWallIndex(-1);
+  };
+
+  const handleMouseUp = () => {
+    handleEnd();
+  };
+
+  const handleTouchStart = (event: React.TouchEvent) => {
+    handleStart(event);
+  };
+
+  const handleTouchMove = (event: React.TouchEvent) => {
+    handleMove(event);
+  };
+
+  const handleTouchEnd = () => {
+    handleEnd();
   };
 
   // Auto-center room to canvas on wall changes
@@ -183,6 +238,28 @@ export function CanvasRenderer({
     }
   }, [tileConfig.selectedTile]);
 
+  // Handle responsive canvas sizing
+  useEffect(() => {
+    const handleResize = () => {
+      const container = canvasRef.current?.parentElement;
+      if (!container) return;
+
+      const containerWidth = container.clientWidth;
+      const maxWidth = Math.min(containerWidth - 32, CANVAS_WIDTH); // 32px for padding
+      const aspectRatio = CANVAS_HEIGHT / CANVAS_WIDTH;
+      const newHeight = maxWidth * aspectRatio;
+
+      setCanvasSize({
+        width: maxWidth,
+        height: Math.min(newHeight, CANVAS_HEIGHT)
+      });
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   useEffect(() => {
     renderCanvas();
   }, [renderCanvas]);
@@ -194,16 +271,24 @@ export function CanvasRenderer({
           ref={canvasRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
+          style={{
+            width: canvasSize.width,
+            height: canvasSize.height,
+            touchAction: 'none' // Prevents default touch behaviors
+          }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          className="cursor-pointer"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="cursor-pointer max-w-full"
         />
       </div>
 
       <div className="text-sm text-gray-600 space-y-1">
-        <p>• Shift+click and drag to pan the view</p>
-        <p>• Drag wall labels to resize walls</p>
+        <p>• <span className="hidden sm:inline">Shift+click and drag to pan the view</span><span className="sm:hidden">Two-finger drag to pan the view</span></p>
+        <p>• <span className="hidden sm:inline">Drag</span><span className="sm:hidden">Touch and drag</span> wall labels to resize walls</p>
       </div>
     </div>
   );
