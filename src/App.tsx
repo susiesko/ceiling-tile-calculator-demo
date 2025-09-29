@@ -31,6 +31,90 @@ function App() {
 
   const validation = validateWalls(walls);
 
+  // Calculate dynamic step numbers based on tile size
+  const getStepNumbers = () => {
+    const is2x4 = tileConfig.size === '2x4';
+    return {
+      roomShape: 1,
+      tileSize: 2,
+      tileOrientation: 3, // Only shown for 2x4
+      adjustWalls: is2x4 ? 4 : 3,
+      chooseTile: is2x4 ? 5 : 4,
+    };
+  };
+
+  const stepNumbers = getStepNumbers();
+
+  // Navigation functions
+  const goToPreviousStep = () => {
+    const currentStep = Object.keys(openSections).find(key => openSections[key as keyof typeof openSections]);
+    if (!currentStep) return;
+
+    let previousStep: keyof typeof openSections | null = null;
+
+    switch (currentStep) {
+      case 'step2':
+        previousStep = 'step1';
+        break;
+      case 'step3':
+        previousStep = 'step2';
+        break;
+      case 'step5':
+        previousStep = tileConfig.size === '2x4' ? 'step3' : 'step2';
+        break;
+      case 'step6':
+        previousStep = 'step5';
+        break;
+    }
+
+    if (previousStep) {
+      toggleSection(previousStep);
+    }
+  };
+
+  const goToNextStep = () => {
+    const currentStep = Object.keys(openSections).find(key => openSections[key as keyof typeof openSections]);
+    if (!currentStep) return;
+
+    let nextStep: keyof typeof openSections | null = null;
+
+    switch (currentStep) {
+      case 'step1':
+        nextStep = 'step2';
+        break;
+      case 'step2':
+        nextStep = tileConfig.size === '2x4' ? 'step3' : 'step5';
+        break;
+      case 'step3':
+        nextStep = 'step5';
+        break;
+      case 'step5':
+        nextStep = 'step6';
+        break;
+    }
+
+    if (nextStep) {
+      toggleSection(nextStep);
+    }
+  };
+
+  // Determine which steps should show navigation buttons and active state
+  const getNavigationProps = (step: keyof typeof openSections) => {
+    const currentStep = Object.keys(openSections).find(key => openSections[key as keyof typeof openSections]);
+    const isCurrentStep = step === currentStep;
+
+    const showBackButton = isCurrentStep && step !== 'step1';
+    const showNextButton = isCurrentStep && step !== 'step6';
+
+    return {
+      isActive: isCurrentStep,
+      showBackButton,
+      showNextButton,
+      onPrevious: showBackButton ? goToPreviousStep : undefined,
+      onNext: showNextButton ? goToNextStep : undefined,
+    };
+  };
+
   const toggleSection = (section: keyof typeof openSections) => {
     setOpenSections((prev) => {
       const isCurrentlyOpen = prev[section];
@@ -81,9 +165,10 @@ function App() {
             {/* Step 1: Choose room shape */}
             <AccordionSection
               title="Choose room shape"
-              stepNumber={1}
+              stepNumber={stepNumbers.roomShape}
               isOpen={openSections.step1}
               onToggle={() => toggleSection('step1')}
+              {...getNavigationProps('step1')}
             >
               <ShapeConfig />
 
@@ -135,30 +220,34 @@ function App() {
             {/* Step 2: Choose tile size */}
             <AccordionSection
               title="Choose tile size"
-              stepNumber={2}
+              stepNumber={stepNumbers.tileSize}
               isOpen={openSections.step2}
               onToggle={() => toggleSection('step2')}
+              {...getNavigationProps('step2')}
             >
               <TileControls />
             </AccordionSection>
 
-            {/* Step 3: Choose tile orientation (if 2x4) */}
-            <AccordionSection
-              title="Choose tile orientation"
-              stepNumber={3}
-              isOpen={openSections.step3}
-              onToggle={() => toggleSection('step3')}
-              isDisabled={tileConfig.size !== '2x4'}
-            >
-              <TileOrientationControls />
-            </AccordionSection>
+            {/* Step 3: Choose tile orientation (only for 2x4) */}
+            {tileConfig.size === '2x4' && (
+              <AccordionSection
+                title="Choose tile orientation"
+                stepNumber={stepNumbers.tileOrientation}
+                isOpen={openSections.step3}
+                onToggle={() => toggleSection('step3')}
+                {...getNavigationProps('step3')}
+              >
+                <TileOrientationControls />
+              </AccordionSection>
+            )}
 
-            {/* Step 5: Adjust wall lengths */}
+            {/* Adjust wall lengths */}
             <AccordionSection
               title="Adjust wall lengths"
-              stepNumber={5}
+              stepNumber={stepNumbers.adjustWalls}
               isOpen={openSections.step5}
               onToggle={() => toggleSection('step5')}
+              {...getNavigationProps('step5')}
             >
               <WallLengthAdjustments />
               <div className="text-sm text-gray-600 mt-4">
@@ -166,12 +255,13 @@ function App() {
               </div>
             </AccordionSection>
 
-            {/* Step 6: Choose tile */}
+            {/* Choose tile */}
             <AccordionSection
               title="Choose tile"
-              stepNumber={6}
+              stepNumber={stepNumbers.chooseTile}
               isOpen={openSections.step6}
               onToggle={() => toggleSection('step6')}
+              {...getNavigationProps('step6')}
             >
               <TilePicker
                 selectedTileSize={tileConfig.size}

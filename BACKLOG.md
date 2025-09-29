@@ -78,3 +78,12 @@ an "x".
   - [x] Only use what's currently in the public/tiles folder.
 - [x] Choosing a tile should fill the room with that tile.
   - [x] Use clipping to ensure tiles only appear within room boundaries.
+- [x] Refactor/Enhance steps
+  - [x] Make sure the steps are in the right order and numbered correctly.  Currently, we skip step 4.
+  - [x] When 2x4 is selected, hide the Choose tile orientation completely, and number the steps accordingly.
+    - 2x2 should have 4 steps. (adjust wall lengths is step 3)
+    - 2x4 should have 5 steps. (adjust wall lengths is step 4)
+  - [x] Add a back button and next step button to each step, where appropriate.
+    - The back button should go to the previous step, and the next step button should go to the next step.
+    - The back button should not show on the first step. The next step button should not show on the last step.
+  - [x] The step that is currently active should be highlighted in some way.
