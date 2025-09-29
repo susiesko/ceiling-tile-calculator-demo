@@ -293,6 +293,17 @@ function App() {
           </div>
         </div>
       </main>
+
+      {/* Footer with Disclaimer */}
+      <footer className="bg-gray-100 border-t border-gray-200 py-4 mt-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-sm text-gray-600">
+            <p>
+              This is a personal project and demonstration. Not associated with any past or current employers.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
